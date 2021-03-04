@@ -92,13 +92,29 @@ class JanggiGame:
 	def convert_position_to_tuple(self, Square):
 		"""Convert a position (a string) entered by the player to the tuple format. e.g. "A1" to (0, 0)"""
 
-		if len(Square) != 2:
+		if len(Square) > 3 or len(Square) <= 1:
 			raise InvalidPositionError
 
+		if not 'A' <= Square[0] <= 'I' and not 'a' <= Square[0] <= 'i':
+			raise InvalidPositionError
+
+		if not '0' <= Square[1] <= '9':
+			raise InvalidPositionError
+
+		if len(Square) == 3:
+			if Square[1:] != '10':
+				raise InvalidPositionError
+
+		row = int(Square[1:]) - 1
+		column = ord(Square[0].upper()) - 65
+
+		return (row, column)
 
 	def convert_position_to_string(self, Square):
 		"""Convert a position in a 2-tuple format to the string format. e.g. (0, 0) to "A1" """
-		pass
+
+		row, column = Square
+		return chr(column + 65) + str(row + 1)
 
 	def switch_turn(self, player):
 		"""Alternate the current turn of the player.
@@ -110,7 +126,10 @@ class JanggiGame:
 		#    At the end of make_move method, the game will continue if no one has won yet.
 		#    The make_move will set the current player's turn to the opponent by calling the switch_turn method.
 		# --------------------------------------------------------------------------------------------------------------
-		pass
+		if player == "BLUE":
+			return "RED"
+		elif player == "RED":
+			return "BLUE"
 
 	def is_in_check(self, player, fromPosition, toPosition):
 		"""Takes player, either 'RED' or 'BLUE", and the move about to make (toPosition) as parameters, and
@@ -200,8 +219,66 @@ class JanggiGame:
 		# Go through the dictionary (row, column)
 			# Print empty space if there is no game piece at the position
 			# Print the name of the game piece if the game piece exist
-		pass
+		# max_spaces = 8
 
+		def cellForPrint(max_spaces, center, left_filler=' ', right_filler=' ', num_cell=1):
+			"""Take the maxium number of spaces occupied, the string at the center,
+			filler characters on the left and on the right, and the number of repeated cells as parameters.
+			Returns the string that print a standardized cell for printing on the terminal."""
+			left = (max_spaces - len(center)) // 2
+			right = max_spaces - len(center) - left
+			cell = left * left_filler + center + right * right_filler
+			return cell * num_cell
+
+		max_spaces = 13
+		row_spaces = 5
+
+		fortress_red = [(i, j) for i in range(0, 3) for j in range(3, 6)]
+		fortress_blue = [(i, j) for i in range(7, 10) for j in range(3, 6)]
+		fortress = fortress_red + fortress_blue
+
+		row_spacer = cellForPrint(row_spaces, '')
+		empty_space = {"other": cellForPrint(max_spaces, "[ ]", '-', '-'),
+		               0: cellForPrint(max_spaces, "[ ]", ' ', '-'),
+		               self._columns - 1: cellForPrint(max_spaces, "[ ]", '-', ' ')}
+
+		empty_space_fortress = {3: cellForPrint(max_spaces, "[ ]", '-', '='),
+		                        4: cellForPrint(max_spaces, "[ ]", '=', '='),
+		                        5: cellForPrint(max_spaces, "[ ]", '=', '-')}
+
+		empty_row = (row_spacer + cellForPrint(max_spaces, "|", num_cell=self._columns) + "\n") * 3
+		empty_row_fortress = (row_spacer + cellForPrint(max_spaces, "|", num_cell=self._columns//2-1) + cellForPrint(max_spaces, "║", num_cell=self._columns//2-1) + cellForPrint(max_spaces, "|", num_cell=self._columns//2-1) + '\n') * 3
+
+		print()
+		print("ROW  " + cellForPrint(max_spaces, '', num_cell=4) + cellForPrint(max_spaces, "COLUMN", ' ', ' '))
+
+		print(row_spacer, end="")
+		for i in range(self._columns):
+			print(cellForPrint(max_spaces, chr(i + 65), ' ', ' '), end="")
+		print()
+
+
+		for i in range(self._rows):
+			print(cellForPrint(row_spaces, str(i + 1)), end="")
+
+			for j in range(self._columns):
+				gamePiece = self._board[(i, j)]
+				if gamePiece:
+					gamePiece.print_name(max_spaces)
+				else:
+					if j in empty_space:
+						print(empty_space[j], end="")
+					elif (i, j) in fortress:
+						print(empty_space_fortress[j], end="")
+					else:
+						print(empty_space["other"], end="")
+			print()
+			if i == self._rows - 1:
+				continue
+			if i < 2 or i > 6:
+				print(empty_row_fortress, end="")
+			else:
+				print(empty_row, end="")
 
 class GamePiece:
 	"""A class that represent individual game piece"""
@@ -226,7 +303,19 @@ class GamePiece:
 		"""Return the name of the game piece."""
 		return self._name
 
+	def print_name(self, max_space):
+		"""Print the name of the game piece on screen with appropriate spacing."""
 
+		if self._player == "RED":
+			ANSI_code = 31
+		elif self._player == "BLUE":
+			ANSI_code = 34
+
+		max_space -= 2
+		pre_space = (max_space - len(self._name)) // 2
+		post_space = max_space - len(self._name) - pre_space
+		gamePieceToPrint = '[' + pre_space * ' ' + self._name + post_space * ' ' + ']'
+		print(f'\033[{ANSI_code}m' + gamePieceToPrint + f'\033[0m', end="")
 
 class General(GamePiece):
 	"""A class that represent the General. Inherited from GamePiece."""
@@ -350,3 +439,7 @@ class Soldier(GamePiece):
 		"""Takes the board and the current position as parameters.
 		Return all legal moves that the Soldier can play next."""
 		pass
+
+class InvalidPositionError(Exception):
+	"""Raised when the input position of the board is invalid."""
+	pass

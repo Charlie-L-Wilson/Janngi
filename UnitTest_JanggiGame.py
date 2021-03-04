@@ -1,5 +1,5 @@
 import unittest
-from JanggiGame import JanggiGame, GamePiece, General, Guard, Horse, Chariot, Cannon, Soldier
+from JanggiGame import JanggiGame, GamePiece, General, Guard, Horse, Chariot, Cannon, Soldier, InvalidPositionError
 
 class TestJanggiGame(unittest.TestCase):
 	"""Testing the JanggiGame class"""
@@ -102,6 +102,53 @@ class TestJanggiGame(unittest.TestCase):
 				position = game.get_position(gamePiece)
 				self.assertIs(game.get_board()[position], gamePiece)
 
+	def test_convert_position(self):
+		"""Testing the convert_position_to_tuple and convert_position_to_string method"""
+
+		game = JanggiGame()
+
+		with self.assertRaises(InvalidPositionError):
+			game.convert_position_to_tuple("A11")
+
+		with self.assertRaises(InvalidPositionError):
+			game.convert_position_to_tuple("A")
+
+		with self.assertRaises(InvalidPositionError):
+			game.convert_position_to_tuple("Z1")
+
+		with self.assertRaises(InvalidPositionError):
+			game.convert_position_to_tuple("AA")
+
+		with self.assertRaises(InvalidPositionError):
+			game.convert_position_to_tuple("11")
+
+		with self.assertRaises(InvalidPositionError):
+			game.convert_position_to_tuple("A11")
+
+		self.assertEqual(game.convert_position_to_tuple("A1"), (0, 0))
+		self.assertEqual(game.convert_position_to_tuple("E5"), (4, 4))
+		self.assertEqual(game.convert_position_to_tuple("e6"), (5, 4))
+		self.assertEqual(game.convert_position_to_tuple("I10"), (9, 8))
+
+		self.assertEqual(game.convert_position_to_string((0, 0)), "A1")
+		self.assertEqual(game.convert_position_to_string((4, 4)), "E5")
+		self.assertEqual(game.convert_position_to_string((5, 4)), "E6")
+		self.assertEqual(game.convert_position_to_string((9, 8)), "I10")
+
+	def test_switch_turn(self):
+		"""Testing the switch_turn method."""
+
+		game = JanggiGame()
+		self.assertEqual(game.switch_turn("BLUE"), "RED")
+		self.assertEqual(game.switch_turn("RED"), "BLUE")
+
+	def test_print_board(self):
+		"""Testing the print_board method."""
+
+		game = JanggiGame()
+		game.print_board()
+
+
 
 class TestGeneral(unittest.TestCase):
 	"""Testing the General class."""
@@ -123,7 +170,6 @@ class TestGeneral(unittest.TestCase):
 
 		self.assertEqual(test_blue_player_0.get_name(), "General")
 		self.assertEqual(test_red_player_0.get_name(), "General")
-
 
 	def test_get_starting_position(self):
 		"""Testing the get_starting position method for the General"""
