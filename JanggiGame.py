@@ -402,13 +402,22 @@ class Guard(GamePiece):
 		"""Takes the board and the current position as parameters.
 		Return all legal moves that the Guard can play next."""
 
-		# All legal moves must be a diagonal moves within the fortress
+		# All vertical and horizontal moves
+		legalMoves = set()
+		for i in range(-1, 2):
+			for j in range(-1, 2):
+				if abs(i + j) == 1:
+					legalMoves.add((current_position[0] + i, current_position[1] + j))
+
+		# Add any available diagonal moves
 		if current_position in self._diagonalMoves:
-			legalMoves = set().union(self._diagonalMoves[current_position])
+			legalMoves = legalMoves.union(self._diagonalMoves[current_position])
+
+		# Remove all moves that are outside of the fortress
+		legalMoves = legalMoves.intersection(self._fortress)
 
 		# Remove all moves that are occupied by other game pieces own by the same player
 		for move in list(legalMoves):
-
 			if board[move] is not None and board[move].get_player() == self._player:
 				legalMoves.remove(move)
 
@@ -430,7 +439,32 @@ class Horse(GamePiece):
 	def legal_moves(self, board, current_position):
 		"""Takes the board and the current position as parameters.
 		Return all legal moves that the Guard can play next."""
-		pass
+
+		legalMoves = set()
+		for i in range(-1, 2):
+			for j in range(-1, 2):
+				if abs(i + j) != 1:
+					continue
+
+				if (current_position[0] + i, current_position[1] + j) not in board:
+					continue
+
+				if board[(current_position[0] + i, current_position[1] + j)] is not None:
+					continue
+
+				for m in range(-1+i, 2+i):
+					for n in range(-1+j, 2+j):
+						if abs(m) + abs(n) != 3:
+							continue
+
+						if (current_position[0] + m, current_position[1] + n) not in board:
+							continue
+
+						if board[(current_position[0] + m, current_position[1] + n)] is not None and board[(current_position[0] + m, current_position[1] + n)].get_player() == self._player:
+							continue
+
+						legalMoves.add((current_position[0] + m, current_position[1] + n))
+		return legalMoves
 
 class Elephant(GamePiece):
 	"""A class that represent the Elephants. Inherited from GamePiece."""

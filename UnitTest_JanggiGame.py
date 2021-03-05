@@ -269,20 +269,62 @@ class TestGuard(unittest.TestCase):
 		test_blue_guard_0 = game.get_players()["BLUE"][1]
 		test_blue_guard_1 = game.get_players()["BLUE"][2]
 
-		self.assertEqual(test_red_guard_0.legal_moves(game.get_board(), game.get_position(test_red_guard_0)), set())
-		self.assertEqual(test_red_guard_1.legal_moves(game.get_board(), game.get_position(test_red_guard_1)), set())
-		self.assertEqual(test_blue_guard_0.legal_moves(game.get_board(), game.get_position(test_blue_guard_0)), set())
-		self.assertEqual(test_blue_guard_1.legal_moves(game.get_board(), game.get_position(test_blue_guard_1)), set())
+		self.assertEqual(test_red_guard_0.legal_moves(game.get_board(), game.get_position(test_red_guard_0)), {(0, 4), (1, 3)})
+		self.assertEqual(test_red_guard_1.legal_moves(game.get_board(), game.get_position(test_red_guard_1)), {(0, 4), (1, 5)})
+		self.assertEqual(test_blue_guard_0.legal_moves(game.get_board(), game.get_position(test_blue_guard_0)), {(8, 3), (9, 4)})
+		self.assertEqual(test_blue_guard_1.legal_moves(game.get_board(), game.get_position(test_blue_guard_1)), {(8, 5), (9, 4)})
 
 		# Moving the Red General to (2, 4)
 		game._board[(2, 4)] = game._board[(1, 4)]
 		game._board[(1, 4)] = None
-		self.assertEqual(test_red_guard_0.legal_moves(game.get_board(), game.get_position(test_red_guard_0)), {(1, 4)})
+		self.assertEqual(test_red_guard_0.legal_moves(game.get_board(), game.get_position(test_red_guard_0)), {(0, 4), (1, 3), (1, 4)})
 
 		# Moving the Guard 0 to (1, 4). Red General is still at (2, 4)
 		game._board[(1, 4)] = game._board[(0, 3)]
 		game._board[(0, 3)] = None
-		self.assertEqual(test_red_guard_0.legal_moves(game.get_board(), game.get_position(test_red_guard_0)), {(0, 3), (2, 3), (2, 5)})
+		self.assertEqual(test_red_guard_0.legal_moves(game.get_board(), game.get_position(test_red_guard_0)), {(0, 3), (0, 4), (1, 3), (1, 5), (2, 3), (2, 5)})
+
+class TestHorse(unittest.TestCase):
+	"""Testing the Horse class."""
+
+	def test_get_starting_position(self):
+		"""Testing the get_starting position method for the Horse."""
+
+		test_red_horse_0 = Horse("RED", 0)
+		test_red_horse_1 = Horse("RED", 1)
+		test_blue_horse_0 = Horse("BLUE", 0)
+		test_blue_horse_1 = Horse("BLUE", 1)
+
+		self.assertEqual(test_red_horse_0.get_starting_position(), (0, 2))
+		self.assertEqual(test_red_horse_1.get_starting_position(), (0, 7))
+		self.assertEqual(test_blue_horse_0.get_starting_position(), (9, 2))
+		self.assertEqual(test_blue_horse_1.get_starting_position(), (9, 7))
+
+	def test_legal_moves(self):
+		"""Testing the legal_moves method for the Horses."""
+
+		game = JanggiGame()
+		test_red_horse_0 = game.get_players()["RED"][3]
+		test_red_horse_1 = game.get_players()["RED"][4]
+		test_blue_horse_0 = game.get_players()["BLUE"][3]
+		test_blue_horse_1 = game.get_players()["BLUE"][4]
+
+		self.assertEqual(test_red_horse_0.legal_moves(game.get_board(), game.get_position(test_red_horse_0)), {(2, 3)})
+		self.assertEqual(test_red_horse_1.legal_moves(game.get_board(), game.get_position(test_red_horse_1)), {(2, 6), (2, 8)})
+		self.assertEqual(test_blue_horse_0.legal_moves(game.get_board(), game.get_position(test_blue_horse_0)), {(7, 3)})
+		self.assertEqual(test_blue_horse_1.legal_moves(game.get_board(), game.get_position(test_blue_horse_1)), {(7, 6), (7, 8)})
+
+		# Moving Red Horse 1 to (2, 3)
+		game._board[(2, 3)] = game._board[(0, 2)]
+		game._board[(0, 2)] = None
+		self.assertEqual(test_red_horse_0.legal_moves(game.get_board(), game.get_position(test_red_horse_0)), {(0, 2), (1, 1), (3, 1), (4, 2), (4, 4), (3, 5), (1, 5), (0, 4)})
+
+		# Moving Blue Horse 1 to (3, 3) and Blue Horse 2 to (3, 1)
+		game._board[(3, 3)] = game._board[(9, 2)]
+		game._board[(9, 2)] = None
+		game._board[(3, 1)] = game._board[(9, 7)]
+		game._board[(9, 7)] = None
+		self.assertEqual(test_red_horse_0.legal_moves(game.get_board(), game.get_position(test_red_horse_0)), {(0, 2), (1, 1), (3, 1), (3, 5), (1, 5), (0, 4)})
 
 
 if __name__ == "__main__":
