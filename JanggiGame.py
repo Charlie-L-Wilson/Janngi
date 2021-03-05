@@ -291,6 +291,22 @@ class GamePiece:
 		self._player = player
 		self._identifier = identifier
 
+		if self._player == "RED":
+			self._fortress = {(i, j) for i in range(0, 3) for j in range(3, 6) }
+		else:
+			self._fortress = {(i, j) for i in range(7, 10) for j in range(3, 6) }
+
+		self._diagonalMoves = {(1, 4): {(0, 3), (0, 5), (2, 3), (2, 5)},
+			                   (0, 3): {(1, 4)},
+			                   (0, 5): {(1, 4)},
+			                   (2, 3): {(1, 4)},
+			                   (2, 5): {(1, 4)},
+			                   (8, 4): {(7, 3), (7, 5), (9, 3), (9, 5)},
+			                   (7, 3): {(8, 4)},
+			                   (7, 5): {(8, 4)},
+			                   (9, 3): {(8, 4)},
+			                   (9, 5): {(8, 4)}}
+
 	def get_player(self):
 		"""Returns the player who own the piece."""
 		return self._player
@@ -330,7 +346,27 @@ class General(GamePiece):
 	def legal_moves(self, board, current_position):
 		"""Takes the board and the current position as parameters.
 		Return all legal moves that the General can play next."""
-		pass
+
+		# All vertical and horizontal moves
+		legalMoves = set()
+		for i in range(-1, 2):
+			for j in range(-1, 2):
+				if abs(i + j) == 1:
+					legalMoves.add((current_position[0] + i, current_position[1] + j))
+
+		# Add any available diagonal moves
+		if current_position in self._diagonalMoves:
+			legalMoves = legalMoves.union(self._diagonalMoves[current_position])
+
+		# Remove all moves that are outside of the fortress
+		legalMoves = legalMoves.intersection(self._fortress)
+
+		# Remove all moves that are occupied by other game pieces own by the same player
+		for move in list(legalMoves):
+			if board[move] is not None and board[move].get_player() == self._player:
+				legalMoves.remove(move)
+
+		return legalMoves
 
 class Guard(GamePiece):
 	"""A class that represent the Guards. Inherited from GamePiece."""
@@ -347,7 +383,9 @@ class Guard(GamePiece):
 	def legal_moves(self, board, current_position):
 		"""Takes the board and the current position as parameters.
 		Return all legal moves that the Guard can play next."""
+
 		pass
+
 
 class Horse(GamePiece):
 	"""A class that represent Horses. Inherited from GamePiece."""

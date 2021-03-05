@@ -146,7 +146,7 @@ class TestJanggiGame(unittest.TestCase):
 		"""Testing the print_board method."""
 
 		game = JanggiGame()
-		game.print_board()
+		# game.print_board()
 
 
 
@@ -183,10 +183,41 @@ class TestGeneral(unittest.TestCase):
 	def test_legal_moves(self):
 		"""Testing the legal_moves method for the General"""
 
-		test_blue_player_0 = General("BLUE", 0)
-		test_red_player_0 = General("RED", 0)
+		game = JanggiGame()
+		red_general = game.get_players()["RED"][0]
+		blue_general = game.get_players()["BLUE"][0]
 
-		pass
+		test_red_general_moves = red_general.legal_moves(game.get_board(), game.get_position(red_general))
+		test_blue_general_moves = blue_general.legal_moves(game.get_board(), game.get_position(blue_general))
+		self.assertEqual(test_red_general_moves, {(0, 4), (1, 3), (1, 5), (2, 3), (2, 4), (2, 5)})
+		self.assertEqual(test_blue_general_moves, {(9, 4), (8, 3), (8, 5), (7, 3), (7, 4), (7, 5)})
+
+		# Move Red General to (2, 5)
+		game._board[(2, 5)] = game._board[(1, 4)]
+		game._board[(1, 4)] = None
+		test_red_general_moves = red_general.legal_moves(game.get_board(), game.get_position(red_general))
+		self.assertEqual(test_red_general_moves, {(1, 4), (1, 5), (2, 4)})
+
+		# Move Blue General to (9, 4)
+		game._board[(9, 4)] = game._board[(8, 4)]
+		game._board[(8, 4)] = None
+		test_blue_general_moves = blue_general.legal_moves(game.get_board(), game.get_position(blue_general))
+		self.assertEqual(test_blue_general_moves, {(8, 4)})
+
+		# Move Blue Soldier to (1, 4), Red General is still in (2, 5)
+		game._board[(1, 4)] = game._board[(6, 4)]
+		game._board[(6, 4)] = None
+		test_red_general_moves = red_general.legal_moves(game.get_board(), game.get_position(red_general))
+		self.assertEqual(test_red_general_moves, {(1, 4), (1, 5), (2, 4)})
+
+		# Move Red General to (1, 5), Blue Soldier is still at (1, 4)
+		game._board[(1, 5)] = game._board[(2, 5)]
+		game._board[(2, 5)] = None
+		test_red_general_moves = red_general.legal_moves(game.get_board(), game.get_position(red_general))
+		self.assertEqual(test_red_general_moves, {(1, 4), (2, 5)})
+
+
+
 
 
 if __name__ == "__main__":
