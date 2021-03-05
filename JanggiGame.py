@@ -53,7 +53,6 @@ class JanggiGame:
 			for game_piece in self._players[player]:
 				self._board[game_piece.get_starting_position()] = game_piece
 
-
 		# Set player's Turn: Blue plays first
 		self._turn = "BLUE"
 
@@ -292,9 +291,16 @@ class GamePiece:
 		self._identifier = identifier
 
 		if self._player == "RED":
-			self._fortress = {(i, j) for i in range(0, 3) for j in range(3, 6) }
+			fortress_row_start = 0
+			fortress_row_end = 3
 		else:
-			self._fortress = {(i, j) for i in range(7, 10) for j in range(3, 6) }
+			fortress_row_start = 7
+			fortress_row_end = 10
+
+		fortress_column_start = 3
+		fortress_column_end = 6
+
+		self._fortress = {(i, j) for i in range(fortress_row_start, fortress_row_end) for j in range(fortress_column_start, fortress_column_end)}
 
 		self._diagonalMoves = {(1, 4): {(0, 3), (0, 5), (2, 3), (2, 5)},
 			                   (0, 3): {(1, 4)},
@@ -310,6 +316,18 @@ class GamePiece:
 	def get_player(self):
 		"""Returns the player who own the piece."""
 		return self._player
+
+	def get_identifier(self):
+		"""Returns the identifier of the game piece"""
+		return self._identifier
+
+	def get_fortress(self):
+		"""Return the set with all positions of the fortress based on the player."""
+		return self._fortress
+
+	def get_diagonalMoves(self, position):
+		"""Return a set of available diagonal moves possible by taking the current position as parameter. The position parameter must be a position where a diagonal move is possible."""
+		return self._diagonalMoves[position]
 
 	def get_starting_position(self):
 		"""Returns the starting position of the game piece based on what game piece it is, who owns the game piece, as well as the identifier of the game piece."""
@@ -340,8 +358,8 @@ class General(GamePiece):
 		"""Instantiate the General object."""
 		super().__init__(player, identifier)
 		self._name = "General"
-		self._starting_position = {("RED", "General", 0)    :   (1, 4),
-		                           ("BLUE", "General", 0)   :   (8, 4)}
+		self._starting_position = {("RED", "General", 0) : (1, 4),
+		                           ("BLUE", "General", 0) : (8, 4)}
 
 	def legal_moves(self, board, current_position):
 		"""Takes the board and the current position as parameters.
@@ -384,7 +402,17 @@ class Guard(GamePiece):
 		"""Takes the board and the current position as parameters.
 		Return all legal moves that the Guard can play next."""
 
-		pass
+		# All legal moves must be a diagonal moves within the fortress
+		if current_position in self._diagonalMoves:
+			legalMoves = set().union(self._diagonalMoves[current_position])
+
+		# Remove all moves that are occupied by other game pieces own by the same player
+		for move in list(legalMoves):
+
+			if board[move] is not None and board[move].get_player() == self._player:
+				legalMoves.remove(move)
+
+		return legalMoves
 
 
 class Horse(GamePiece):
