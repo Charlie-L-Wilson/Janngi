@@ -537,10 +537,74 @@ class Chariot(GamePiece):
 		                           ("BLUE", "Chariot", 0) :   (9, 0),
 		                           ("BLUE", "Chariot", 1) :   (9, 8)}
 
-	def legal_moves(self, board, position):
+		self._diagonalMovesExtendedRed = {(0, 3): (2, 5),
+		                                  (0, 5): (2, 3),
+		                                  (2, 3): (0, 5),
+		                                  (2, 5): (0, 3)}
+
+		self._diagonalMovesExtendedBlue = {(7, 3): (9, 5),
+		                                   (7, 5): (9, 3),
+		                                   (9, 3): (7, 5),
+		                                   (9, 5): (7, 3)}
+
+	def legal_moves(self, board, current_position):
 		"""Takes the board and the current position as parameters.
 		Return all legal moves that the Chariot can play next."""
-		pass
+
+		def orthogonal_check(position, axis, direction):
+			"""Function that check in one direction and return a set of legal moves for the chariot."""
+
+			def update_position(position, axis, direction):
+				"""Takes the position, axis to be changed, and the direction of movement as parameters. Update and return the new position."""
+
+				position_list = list(position)
+				position_list[axis] += direction
+				return tuple(position_list)
+
+			moves = set()
+			position = update_position(position, axis, direction)
+
+			while position in board:
+
+				if board[position] is None:
+					moves.add(position)
+					position =update_position(position, axis, direction)
+
+				elif board[position].get_player() != self._player:
+					moves.add(position)
+					break
+
+				else:
+					break
+
+			return moves
+
+		legalMoves = set()
+		for axis in [0, 1]:
+			for direction in [-1, 1]:
+				legalMoves = legalMoves.union(orthogonal_check(current_position, axis, direction))
+
+		# Add any available diagonal moves
+		if current_position in self._diagonalMoves:
+			for move in self._diagonalMoves[current_position]:
+				if board[move] is None or board[move].get_player() != self._player:
+					legalMoves.add(move)
+
+			if current_position in self._diagonalMovesExtendedRed and board[(1, 4)] is None:
+				extendedDiagonalMove = self._diagonalMovesExtendedRed[current_position]
+				if board[extendedDiagonalMove].get_player() != self._player:
+					legalMoves.add(extendedDiagonalMove)
+
+			if current_position in self._diagonalMovesExtendedBlue and board[(8, 4)] is None:
+				extendedDiagonalMove = self._diagonalMovesExtendedBlue[current_position]
+				if board[extendedDiagonalMove].get_player() != self._player:
+					legalMoves.add(extendedDiagonalMove)
+		return legalMoves
+
+
+
+
+
 
 class Cannon(GamePiece):
 	"""A class that represent Cannon. Inherited from GamePiece."""
