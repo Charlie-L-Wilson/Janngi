@@ -1,5 +1,6 @@
 import unittest
-from JanggiGame import JanggiGame, GamePiece, General, Guard, Horse, Elephant, Chariot, Cannon, Soldier, InvalidPositionError
+from JanggiGame import JanggiGame, General, Guard, Horse, Elephant, Chariot, Cannon, Soldier, InvalidPositionError
+
 
 class TestJanggiGame(unittest.TestCase):
 	"""Testing the JanggiGame class"""
@@ -15,7 +16,7 @@ class TestJanggiGame(unittest.TestCase):
 		self.assertEqual(game._turn, "BLUE")
 		self.assertEqual(game._status, "UNFINISHED")
 
-		test_positions = [[None for j in range(game._columns)] for i in range(game._rows)]
+		test_positions = [[None for _ in range(game._columns)] for _ in range(game._rows)]
 
 		for i in range(game._rows):
 			for j in range(game._columns):
@@ -498,7 +499,87 @@ class TestCannon(unittest.TestCase):
 		game._board[(3, 5)] = None
 		self.assertEqual(test_blue_cannon_1.legal_moves(game.get_board(), game.get_position(test_blue_cannon_1)), set())
 
+class TestSoldier(unittest.TestCase):
+	"""Testing the Soldier class."""
 
+	def test_get_starting_position(self):
+		"""Testing the get_starting position method for the Soldier."""
+
+		test_red_solider_0 = Soldier("RED", 0)
+		test_red_solider_1 = Soldier("RED", 1)
+		test_red_solider_2 = Soldier("RED", 2)
+		test_red_solider_3 = Soldier("RED", 3)
+		test_red_solider_4 = Soldier("RED", 4)
+		test_blue_solider_0 = Soldier("BLUE", 0)
+		test_blue_solider_1 = Soldier("BLUE", 1)
+		test_blue_solider_2 = Soldier("BLUE", 2)
+		test_blue_solider_3 = Soldier("BLUE", 3)
+		test_blue_solider_4 = Soldier("BLUE", 4)
+
+		self.assertEqual(test_red_solider_0.get_starting_position(), (3, 0))
+		self.assertEqual(test_red_solider_1.get_starting_position(), (3, 2))
+		self.assertEqual(test_red_solider_2.get_starting_position(), (3, 4))
+		self.assertEqual(test_red_solider_3.get_starting_position(), (3, 6))
+		self.assertEqual(test_red_solider_4.get_starting_position(), (3, 8))
+
+		self.assertEqual(test_blue_solider_0.get_starting_position(), (6, 0))
+		self.assertEqual(test_blue_solider_1.get_starting_position(), (6, 2))
+		self.assertEqual(test_blue_solider_2.get_starting_position(), (6, 4))
+		self.assertEqual(test_blue_solider_3.get_starting_position(), (6, 6))
+		self.assertEqual(test_blue_solider_4.get_starting_position(), (6, 8))
+
+	def test_legal_moves(self):
+		"""Testing the legal_moves method for the Soldier."""
+
+		game = JanggiGame()
+		test_red_solider_0 = game.get_players()["RED"][11]
+		test_red_solider_1 = game.get_players()["RED"][12]
+		test_red_solider_2 = game.get_players()["RED"][13]
+		test_red_solider_3 = game.get_players()["RED"][14]
+		test_red_solider_4 = game.get_players()["RED"][15]
+
+		test_blue_solider_0 = game.get_players()["BLUE"][11]
+		test_blue_solider_1 = game.get_players()["BLUE"][12]
+		test_blue_solider_2 = game.get_players()["BLUE"][13]
+		test_blue_solider_3 = game.get_players()["BLUE"][14]
+		test_blue_solider_4 = game.get_players()["BLUE"][15]
+
+		self.assertEqual(test_red_solider_0.legal_moves(game.get_board(), game.get_position(test_red_solider_0)), {(3, 1), (4, 0)})
+		self.assertEqual(test_red_solider_1.legal_moves(game.get_board(), game.get_position(test_red_solider_1)), {(3, 1), (3, 3), (4, 2)})
+		self.assertEqual(test_red_solider_2.legal_moves(game.get_board(), game.get_position(test_red_solider_2)), {(3, 3), (3, 5), (4, 4)})
+		self.assertEqual(test_red_solider_3.legal_moves(game.get_board(), game.get_position(test_red_solider_3)), {(3, 5), (3, 7), (4, 6)})
+		self.assertEqual(test_red_solider_4.legal_moves(game.get_board(), game.get_position(test_red_solider_4)), {(3, 7), (4, 8)})
+
+		self.assertEqual(test_blue_solider_0.legal_moves(game.get_board(), game.get_position(test_blue_solider_0)), {(6, 1), (5, 0)})
+		self.assertEqual(test_blue_solider_1.legal_moves(game.get_board(), game.get_position(test_blue_solider_1)), {(6, 1), (6, 3), (5, 2)})
+		self.assertEqual(test_blue_solider_2.legal_moves(game.get_board(), game.get_position(test_blue_solider_2)), {(6, 3), (6, 5), (5, 4)})
+		self.assertEqual(test_blue_solider_3.legal_moves(game.get_board(), game.get_position(test_blue_solider_3)), {(6, 5), (6, 7), (5, 6)})
+		self.assertEqual(test_blue_solider_4.legal_moves(game.get_board(), game.get_position(test_blue_solider_4)), {(6, 7), (5, 8)})
+
+		# Move Red Soldier 2 to (5, 2)
+		game._board[(5, 2)] = game._board[(3, 2)]
+		game._board[(3, 2)] = None
+		self.assertEqual(test_red_solider_1.legal_moves(game.get_board(), game.get_position(test_red_solider_1)), {(5, 1), (5, 3), (6, 2)})
+		self.assertEqual(test_blue_solider_1.legal_moves(game.get_board(), game.get_position(test_blue_solider_1)), {(6, 1), (6, 3), (5, 2)})
+
+		# Move Blue Soldier 3 to (2, 5)
+		game._board[(2, 5)] = game._board[(6, 4)]
+		game._board[(6, 4)] = None
+		self.assertEqual(test_blue_solider_2.legal_moves(game.get_board(), game.get_position(test_blue_solider_2)), {(2, 4), (2, 6), (1, 5), (1, 4)})
+
+		# Move Blue General to (9, 4)
+		game._board[(9, 4)] = game._board[(8, 4)]
+		game._board[(8, 4)] = None
+
+		# Move Red Soldier 4 to (8, 4)
+		game._board[(8, 4)] = game._board[(3, 6)]
+		game._board[(3, 6)] = None
+
+		# Move Red Soldier 5  to (9, 5)
+		game._board[(9, 5)] = game._board[(3, 8)]
+		game._board[(3, 8)] = None
+
+		self.assertEqual(test_red_solider_3.legal_moves(game.get_board(), game.get_position(test_red_solider_3)), {(8, 3), (8, 5), (9, 3), (9, 4)})
 
 if __name__ == "__main__":
 	unittest.main()

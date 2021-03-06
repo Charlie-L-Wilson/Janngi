@@ -712,10 +712,46 @@ class Soldier(GamePiece):
 		                           ("BLUE", "Soldier", 3)   :   (6, 6),
 		                           ("BLUE", "Soldier", 4)   :   (6, 8)}
 
-	def legal_moves(self, board, position):
+		self._diagonalMovesExtended = {(2, 3): {(1, 4)},
+		                               (2, 5): {(1, 4)},
+			                           (1, 4): {(0, 3), (0, 5)},
+			                           (7, 3): {(8, 4)},
+			                           (7, 5): {(8, 4)},
+			                           (8, 4): {(9, 3), (9, 5)}}
+
+	def legal_moves(self, board, current_position):
 		"""Takes the board and the current position as parameters.
 		Return all legal moves that the Soldier can play next."""
-		pass
+
+		def update_position(position, axis, direction):
+			"""Takes the position, axis to be changed, and the direction of movement as parameters. Update and return the new position."""
+
+			position_list = list(position)
+			position_list[axis] += direction
+			return tuple(position_list)
+
+		legalMoves = set()
+
+		if self._player == "RED":
+			direction = 1
+		else:
+			direction = -1
+
+		orthogonal_moves = {update_position(current_position, 0, direction),
+							update_position(current_position, 1, -1),
+		                    update_position(current_position, 1, 1)}
+
+		for move in orthogonal_moves:
+			if move in board and (board[move] is None or board[move].get_player() != self._player):
+				legalMoves.add(move)
+
+		if current_position in self._diagonalMovesExtended:
+			extendedDiagonalMove = self._diagonalMovesExtended[current_position]
+			for move in extendedDiagonalMove:
+				if board[move] is None or board[move].get_player() != self._player:
+					legalMoves.add(move)
+
+		return legalMoves
 
 class InvalidPositionError(Exception):
 	"""Raised when the input position of the board is invalid."""
