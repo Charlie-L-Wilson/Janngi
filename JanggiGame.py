@@ -438,32 +438,33 @@ class Horse(GamePiece):
 
 	def legal_moves(self, board, current_position):
 		"""Takes the board and the current position as parameters.
-		Return all legal moves that the Guard can play next."""
+		Return all legal moves that the Horse can play next."""
 
 		legalMoves = set()
+		x, y = current_position
 		for i in range(-1, 2):
 			for j in range(-1, 2):
 				if abs(i + j) != 1:
 					continue
 
-				if (current_position[0] + i, current_position[1] + j) not in board:
+				if (x + i, y + j) not in board:
 					continue
 
-				if board[(current_position[0] + i, current_position[1] + j)] is not None:
+				if board[(x + i, y + j)] is not None:
 					continue
 
-				for m in range(-1+i, 2+i):
-					for n in range(-1+j, 2+j):
+				for m in range(-1 + i, 2 + i):
+					for n in range(-1 + j, 2 + j):
 						if abs(m) + abs(n) != 3:
 							continue
 
-						if (current_position[0] + m, current_position[1] + n) not in board:
+						if (x + m, y + n) not in board:
 							continue
 
-						if board[(current_position[0] + m, current_position[1] + n)] is not None and board[(current_position[0] + m, current_position[1] + n)].get_player() == self._player:
+						if board[(x + m, y + n)] is not None and board[(x + m, y + n)].get_player() == self._player:
 							continue
 
-						legalMoves.add((current_position[0] + m, current_position[1] + n))
+						legalMoves.add((x + m, y + n))
 		return legalMoves
 
 class Elephant(GamePiece):
@@ -478,10 +479,51 @@ class Elephant(GamePiece):
 		                           ("BLUE", "Elephant", 0) :   (9, 1),
 		                           ("BLUE", "Elephant", 1) :   (9, 6)}
 
-	def legal_moves(self, board, position):
+	def legal_moves(self, board, current_position):
 		"""Takes the board and the current position as parameters.
 		Return all legal moves that the Elephant can play next."""
-		pass
+
+		legalMoves = set()
+		x, y = current_position
+		for i in range(-1, 2):
+			for j in range(-1, 2):
+				if abs(i + j) != 1:
+					continue
+
+				if (x + i, y + j) not in board:
+					continue
+
+				if board[(x + i, y + j)] is not None:
+					continue
+
+				for m in range(-1+i, 2+i):
+					for n in range(-1+j, 2+j):
+
+						if abs(m) + abs(n) != 3:
+							continue
+
+						if (x + m, y + n) not in board:
+							continue
+
+						if board[(x + m, y + n)] is not None:
+							continue
+
+						for p in range(-1 + m, 2 + m):
+							for q in range(-1 + n, 2 + n):
+
+								if abs(p) + abs(q) != 5:
+									continue
+
+								if (x + p, y + q) not in board:
+									continue
+
+								if board[(x + p, y + q)] is not None and board[
+									(x + p, y + q)].get_player() == self._player:
+									continue
+
+								legalMoves.add((x + p, y + q))
+
+		return legalMoves
 
 class Chariot(GamePiece):
 	"""A class that represent Chariots. Inherited from GamePiece."""
