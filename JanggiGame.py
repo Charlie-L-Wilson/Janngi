@@ -601,11 +601,6 @@ class Chariot(GamePiece):
 					legalMoves.add(extendedDiagonalMove)
 		return legalMoves
 
-
-
-
-
-
 class Cannon(GamePiece):
 	"""A class that represent Cannon. Inherited from GamePiece."""
 
@@ -618,10 +613,81 @@ class Cannon(GamePiece):
 		                           ("BLUE", "Cannon", 0) :   (7, 1),
 		                           ("BLUE", "Cannon", 1) :   (7, 7)}
 
-	def legal_moves(self, board, position):
+		self._diagonalMovesExtendedRed = {(0, 3): (2, 5),
+		                                  (0, 5): (2, 3),
+		                                  (2, 3): (0, 5),
+		                                  (2, 5): (0, 3)}
+
+		self._diagonalMovesExtendedBlue = {(7, 3): (9, 5),
+		                                   (7, 5): (9, 3),
+		                                   (9, 3): (7, 5),
+		                                   (9, 5): (7, 3)}
+
+	def legal_moves(self, board, current_position):
 		"""Takes the board and the current position as parameters.
 		Return all legal moves that the Cannon can play next."""
-		pass
+
+		def jump_over_check(position, axis, direction):
+			"""Function that check in one direction and return a set of legal moves for the chariot."""
+
+			def update_position(position, axis, direction):
+				"""Takes the position, axis to be changed, and the direction of movement as parameters. Update and return the new position."""
+
+				position_list = list(position)
+				position_list[axis] += direction
+				return tuple(position_list)
+
+			moves = set()
+			position = update_position(position, axis, direction)
+			jumped = False
+
+			while position in board:
+
+				if board[position] is not None and board[position].get_name() == "Cannon":
+					break
+
+				if jumped:
+					if board[position] is None:
+						moves.add(position)
+
+					elif board[position].get_player() != self._player:
+						moves.add(position)
+						break
+
+					else:
+						break
+
+				elif board[position] is not None:
+					jumped = True
+
+				position = update_position(position, axis, direction)
+
+			return moves
+
+		def check_diagonal(board, position, diagonalMovesExtended, centerPosition):
+			"""Takes the dictionary of Extended diagonal moves and the center position of the fortress as parameters and return a set of legal moves for the Cannon."""
+			moves = set()
+			if position in diagonalMovesExtended:
+				extendedDiagonalMove = diagonalMovesExtended[position]
+				if board[centerPosition] is not None and board[centerPosition].get_name() != "Cannon":
+					if board[extendedDiagonalMove] is None:
+						moves.add(extendedDiagonalMove)
+					elif board[extendedDiagonalMove].get_player() != self._player and board[extendedDiagonalMove].get_name() != "Cannon":
+						moves.add(extendedDiagonalMove)
+			return moves
+
+		legalMoves = set()
+		legalMoves = jump_over_check(current_position, 0, 1)
+
+		for axis in [0, 1]:
+			for direction in [-1, 1]:
+				legalMoves = legalMoves.union(jump_over_check(current_position, axis, direction))
+
+		legalMoves = legalMoves.union(check_diagonal(board, current_position, self._diagonalMovesExtendedRed, (1, 4)))
+
+		legalMoves = legalMoves.union(check_diagonal(board, current_position, self._diagonalMovesExtendedBlue, (8, 4)))
+
+		return legalMoves
 
 class Soldier(GamePiece):
 	"""A class that represent Soldier. Inherited from GamePiece"""

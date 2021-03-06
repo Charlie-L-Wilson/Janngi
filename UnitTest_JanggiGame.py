@@ -417,12 +417,88 @@ class TestChariot(unittest.TestCase):
 		game._board[(0, 8)] = None
 
 		self.assertEqual(test_red_Chariot_0.legal_moves(game.get_board(), game.get_position(test_red_Chariot_0)), {(1, 3), (2, 3), (3, 3), (4, 3), (5, 3), (6, 3), (8, 3), (9, 3), (7, 2), (7, 1), (7, 4),
-		                  (7, 5), (7, 6), (7, 7), (8, 4)})
+		                                                                                                           (7, 5), (7, 6), (7, 7), (8, 4)})
 
 		# Move Red Chariot 1 to (8, 4)
 		game._board[(8, 4)] = game._board[(7, 3)]
 		game._board[(7, 3)] = None
 		self.assertEqual(test_red_Chariot_0.legal_moves(game.get_board(), game.get_position(test_red_Chariot_0)), {(8, 0), (8, 1), (8, 2), (8, 3), (8, 5), (8, 6), (8, 7), (8, 8), (7, 4), (6, 4), (7, 3), (7, 5), (9, 3), (9, 4)})
+
+class TestCannon(unittest.TestCase):
+	"""Testing the Cannon class."""
+
+	def test_get_starting_position(self):
+		"""Testing the get_starting position method for the Cannon."""
+
+		test_red_cannon_0 = Cannon("RED", 0)
+		test_red_cannon_1 = Cannon("RED", 1)
+		test_blue_cannon_0 = Cannon("BLUE", 0)
+		test_blue_cannon_1 = Cannon("BLUE", 1)
+
+		self.assertEqual(test_red_cannon_0.get_starting_position(), (2, 1))
+		self.assertEqual(test_red_cannon_1.get_starting_position(), (2, 7))
+		self.assertEqual(test_blue_cannon_0.get_starting_position(), (7, 1))
+		self.assertEqual(test_blue_cannon_1.get_starting_position(), (7, 7))
+
+	def test_legal_moves(self):
+		"""Testing the legal_moves method for the Cannons."""
+
+		game = JanggiGame()
+		test_red_cannon_0 = game.get_players()["RED"][9]
+		test_red_cannon_1 = game.get_players()["RED"][10]
+		test_blue_cannon_0 = game.get_players()["BLUE"][9]
+		test_blue_cannon_1 = game.get_players()["BLUE"][10]
+
+		self.assertEqual(test_red_cannon_0.legal_moves(game.get_board(), game.get_position(test_red_cannon_0)), set())
+		self.assertEqual(test_red_cannon_1.legal_moves(game.get_board(), game.get_position(test_red_cannon_1)), set())
+		self.assertEqual(test_blue_cannon_0.legal_moves(game.get_board(), game.get_position(test_blue_cannon_0)), set())
+		self.assertEqual(test_blue_cannon_1.legal_moves(game.get_board(), game.get_position(test_blue_cannon_1)), set())
+
+		# Moving Red Cannon 1 to (2, 4)
+		game._board[(2, 4)] = game._board[(2, 1)]
+		game._board[(2, 1)] = None
+		self.assertEqual(test_red_cannon_0.legal_moves(game.get_board(), game.get_position(test_red_cannon_0)), {(0, 4), (4, 4), (5, 4), (6, 4)})
+
+		# Moving Red Cannon 2 to (3, 7)
+		game._board[(3, 7)] = game._board[(2, 7)]
+		game._board[(2, 7)] = None
+		self.assertEqual(test_red_cannon_1.legal_moves(game.get_board(), game.get_position(test_red_cannon_1)), {(3, 5)})
+
+		# Moving Blue Cannon 2 to (7, 5)
+		game._board[(7, 5)] = game._board[(7, 7)]
+		game._board[(7, 7)] = None
+		self.assertEqual(test_blue_cannon_1.legal_moves(game.get_board(), game.get_position(test_blue_cannon_1)), set())
+
+		# Moving Blue Guard 1 to (9, 4)
+		game._board[(9, 4)] = game._board[(9, 3)]
+		game._board[(9, 3)] = None
+		self.assertEqual(test_blue_cannon_1.legal_moves(game.get_board(), game.get_position(test_blue_cannon_1)), {(9, 3)})
+
+		# Moving Blue General to (8, 5)
+		game._board[(8, 5)] = game._board[(8, 4)]
+		game._board[(8, 4)] = None
+		self.assertEqual(test_blue_cannon_1.legal_moves(game.get_board(), game.get_position(test_blue_cannon_1)), set())
+
+		# Moving Red Cannon 1 to (8, 4)
+		game._board[(8, 4)] = game._board[(2, 4)]
+		game._board[(2, 4)] = None
+		self.assertEqual(test_blue_cannon_1.legal_moves(game.get_board(), game.get_position(test_blue_cannon_1)), set())
+
+		# Moving Red Cannon 2 to (3, 5)
+		game._board[(3, 5)] = game._board[(3, 7)]
+		game._board[(3, 7)] = None
+		self.assertEqual(test_red_cannon_1.legal_moves(game.get_board(), game.get_position(test_red_cannon_1)), {(3, 3), (3, 7)})
+		self.assertEqual(test_blue_cannon_1.legal_moves(game.get_board(), game.get_position(test_blue_cannon_1)), set())
+
+		# Moving Blue Guard 1 to (8, 4)
+		game._board[(8, 4)] = game._board[(9, 4)]
+		game._board[(9, 4)] = None
+		# Moving Red Cannon 2 to (9, 3)
+		game._board[(9, 3)] = game._board[(3, 5)]
+		game._board[(3, 5)] = None
+		self.assertEqual(test_blue_cannon_1.legal_moves(game.get_board(), game.get_position(test_blue_cannon_1)), set())
+
+
 
 if __name__ == "__main__":
 	unittest.main()
