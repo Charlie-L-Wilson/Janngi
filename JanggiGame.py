@@ -579,6 +579,16 @@ class Chariot(GamePiece):
 
 			return moves
 
+		def check_extended_diagonal(board, position, diagonalMovesExtended, centerPosition):
+			"""Takes the dictionary of Extended diagonal moves and the center position of the fortress as parameters and return a set of legal diagonal moves for the Chariot."""
+
+			moves = set()
+			if position in diagonalMovesExtended and board[centerPosition] is None:
+				extendedDiagonalMove = diagonalMovesExtended[position]
+				if board[extendedDiagonalMove].get_player() != self._player:
+					moves.add(extendedDiagonalMove)
+			return moves
+
 		legalMoves = set()
 		for axis in [0, 1]:
 			for direction in [-1, 1]:
@@ -590,15 +600,10 @@ class Chariot(GamePiece):
 				if board[move] is None or board[move].get_player() != self._player:
 					legalMoves.add(move)
 
-			if current_position in self._diagonalMovesExtendedRed and board[(1, 4)] is None:
-				extendedDiagonalMove = self._diagonalMovesExtendedRed[current_position]
-				if board[extendedDiagonalMove].get_player() != self._player:
-					legalMoves.add(extendedDiagonalMove)
+			legalMoves = legalMoves.union(check_extended_diagonal(board, current_position, self._diagonalMovesExtendedRed, (1, 4)))
 
-			if current_position in self._diagonalMovesExtendedBlue and board[(8, 4)] is None:
-				extendedDiagonalMove = self._diagonalMovesExtendedBlue[current_position]
-				if board[extendedDiagonalMove].get_player() != self._player:
-					legalMoves.add(extendedDiagonalMove)
+			legalMoves = legalMoves.union(check_extended_diagonal(board, current_position, self._diagonalMovesExtendedBlue, (8, 4)))
+
 		return legalMoves
 
 class Cannon(GamePiece):
@@ -665,7 +670,7 @@ class Cannon(GamePiece):
 			return moves
 
 		def check_diagonal(board, position, diagonalMovesExtended, centerPosition):
-			"""Takes the dictionary of Extended diagonal moves and the center position of the fortress as parameters and return a set of legal moves for the Cannon."""
+			"""Takes the dictionary of Extended diagonal moves and the center position of the fortress as parameters and return a set of legal diagonal moves for the Cannon."""
 			moves = set()
 			if position in diagonalMovesExtended:
 				extendedDiagonalMove = diagonalMovesExtended[position]
