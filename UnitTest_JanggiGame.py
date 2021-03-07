@@ -136,12 +136,12 @@ class TestJanggiGame(unittest.TestCase):
 		self.assertEqual(game.convert_position_to_string((5, 4)), "E6")
 		self.assertEqual(game.convert_position_to_string((9, 8)), "I10")
 
-	def test_switch_turn(self):
-		"""Testing the switch_turn method."""
+	def test_get_opponent(self):
+		"""Testing the get_opponent method."""
 
 		game = JanggiGame()
-		self.assertEqual(game.switch_turn("BLUE"), "RED")
-		self.assertEqual(game.switch_turn("RED"), "BLUE")
+		self.assertEqual(game.get_opponent("BLUE"), "RED")
+		self.assertEqual(game.get_opponent("RED"), "BLUE")
 
 	def test_print_board(self):
 		"""Testing the print_board method."""
@@ -149,7 +149,36 @@ class TestJanggiGame(unittest.TestCase):
 		game = JanggiGame()
 		# game.print_board()
 
+	def test_is_in_check(self):
+		"""Testing the is_in_check method."""
 
+		game = JanggiGame()
+
+		# Move Blue Cannon 1 to (4, 4)
+		game._board[(4, 4)] = game._board[(7, 1)]
+		game._board[(7, 1)] = None
+		self.assertTrue(game.is_in_check("RED", (1, 4), (2, 4)))
+
+		# Move Red General to (1, 3)
+		game._board[(1, 3)] = game._board[(1, 4)]
+		game._board[(1, 4)] = None
+		self.assertFalse(game.is_in_check("RED", (1, 3), (2, 3)))
+
+		# Move Blue horse 2 to (1, 5)
+		game._board[(1, 5)] = game._board[(9, 7)]
+		game._board[(9, 7)] = None
+		self.assertTrue(game.is_in_check("RED", (1, 3), (2, 3)))
+
+		# Move Red Guard 2 to (1, 4)
+		game._board[(1, 4)] = game._board[(0, 5)]
+		game._board[(0, 5)] = None
+		self.assertFalse(game.is_in_check("RED", (1, 3), (2, 3)))
+
+		# Move red soldier 5 to (7, 5)
+		game._board[(7, 5)] = game._board[(3, 8)]
+		game._board[(3, 8)] = None
+		self.assertTrue(game.is_in_check("BLUE", (8, 4), (7, 4)))
+		self.assertFalse(game.is_in_check("BLUE", (8, 4), (7, 5)))
 
 class TestGeneral(unittest.TestCase):
 	"""Testing the General class."""

@@ -115,7 +115,7 @@ class JanggiGame:
 		row, column = Square
 		return chr(column + 65) + str(row + 1)
 
-	def switch_turn(self, player):
+	def get_opponent(self, player):
 		"""Alternate the current turn of the player.
 		If the player is RED, then it will return BLUE.
 		If the player is BLUE, then it will return RED."""
@@ -139,7 +139,28 @@ class JanggiGame:
 				# Return True if there is at least one move that can capture the general.
 				# Return False if there is no possible moves that can capture the general.
 		# Reverse making the move
-		pass
+
+		inCheck = False
+
+		# Making the move
+		captured = self._board[toPosition]
+		self._board[toPosition] = self._board[fromPosition]
+		self._board[fromPosition] = None
+		if captured is not None:
+			self._players[self.get_opponent(player)].remove(captured)
+
+		for gamePiece in self._players[self.get_opponent(player)]:
+			for move in gamePiece.legal_moves(self._board, self.get_position(gamePiece)):
+				if self._board[move] == self._players[player][0]:
+					inCheck = True
+
+		# Restoring the move
+		self._board[fromPosition] = self._board[toPosition]
+		self._board[toPosition] = captured
+		if captured is not None:
+			self._players[self.get_opponent(player)].append(captured)
+
+		return inCheck
 
 	def is_checkmate(self, opponent):
 		"""Takes the opponent as the parameter and determine if his/she has been checkmate."""
