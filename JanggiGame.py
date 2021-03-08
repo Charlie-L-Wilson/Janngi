@@ -130,8 +130,8 @@ class JanggiGame:
 		elif player == "RED":
 			return "BLUE"
 
-	def is_in_check(self, player, fromPosition, toPosition):
-		"""Takes player, either 'RED' or 'BLUE", and the move about to make (toPosition) as parameters, and
+	def is_in_check(self, player):
+		"""Takes player, either 'RED' or 'BLUE" and
 		returns True if that player is in check and return False otherwise."""
 		# Make the move and save the position and object of the game piece if it is being captured.
 		# Go though all game pieces held by the opponent
@@ -143,11 +143,11 @@ class JanggiGame:
 		inCheck = False
 
 		# Making the move
-		captured = self._board[toPosition]
-		self._board[toPosition] = self._board[fromPosition]
-		self._board[fromPosition] = None
-		if captured is not None:
-			self._players[self.get_opponent(player)].remove(captured)
+		# captured = self._board[toPosition]
+		# self._board[toPosition] = self._board[fromPosition]
+		# self._board[fromPosition] = None
+		# if captured is not None:
+		# 	self._players[self.get_opponent(player)].remove(captured)
 
 		for gamePiece in self._players[self.get_opponent(player)]:
 			for move in gamePiece.legal_moves(self._board, self.get_position(gamePiece)):
@@ -155,10 +155,10 @@ class JanggiGame:
 					inCheck = True
 
 		# Restoring the move
-		self._board[fromPosition] = self._board[toPosition]
-		self._board[toPosition] = captured
-		if captured is not None:
-			self._players[self.get_opponent(player)].append(captured)
+		# self._board[fromPosition] = self._board[toPosition]
+		# self._board[toPosition] = captured
+		# if captured is not None:
+		# 	self._players[self.get_opponent(player)].append(captured)
 
 		return inCheck
 
