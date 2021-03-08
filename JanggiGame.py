@@ -140,30 +140,17 @@ class JanggiGame:
 				# Return False if there is no possible moves that can capture the general.
 		# Reverse making the move
 
-		inCheck = False
-
-		# Making the move
-		# captured = self._board[toPosition]
-		# self._board[toPosition] = self._board[fromPosition]
-		# self._board[fromPosition] = None
-		# if captured is not None:
-		# 	self._players[self.get_opponent(player)].remove(captured)
+		checked = False
 
 		for gamePiece in self._players[self.get_opponent(player)]:
 			for move in gamePiece.legal_moves(self._board, self.get_position(gamePiece)):
 				if self._board[move] == self._players[player][0]:
-					inCheck = True
+					checked = True
 
-		# Restoring the move
-		# self._board[fromPosition] = self._board[toPosition]
-		# self._board[toPosition] = captured
-		# if captured is not None:
-		# 	self._players[self.get_opponent(player)].append(captured)
+		return checked
 
-		return inCheck
-
-	def is_checkmate(self, opponent):
-		"""Takes the opponent as the parameter and determine if his/she has been checkmate."""
+	def is_checkmate(self, player):
+		"""Takes the player as the parameter and determine if the player has been checkmate."""
 		# --------------------------------------------------------------------------------------------------------------
 		# DETAILED TEXT DESCRIPTIONS OF HOW TO HANDLE THE SCENARIOS
 		# 6. Determining how to detect the checkmate scenario.
@@ -171,7 +158,43 @@ class JanggiGame:
 		#    If there is no legal moves that the opponent can make to get out of being in check,
 		#    then the opponent has been checkmated.
 		# --------------------------------------------------------------------------------------------------------------
-		pass
+
+		if not self.is_in_check(player):
+			return False
+
+		checkmated = True
+
+		i = 0
+		while i < len(self._players[player]) and checkmated:
+			gamePiece = self._players[player][i]
+			i += 1
+
+			legalMoves = list(gamePiece.legal_moves(self._board, self.get_position(gamePiece)))
+			j = 0
+			while j < len(legalMoves) and checkmated:
+				move = legalMoves[j]
+				j += 1
+				toPosition = move
+				fromPosition = self.get_position(gamePiece)
+				captured = self._board[toPosition]
+
+				# Making the move
+				self._board[toPosition] = self._board[fromPosition]
+				self._board[fromPosition] = None
+				if captured is not None:
+					self._players[self.get_opponent(player)].remove(captured)
+
+				# Check if the player is still being in check
+				if not self.is_in_check(player):
+					checkmated = False
+
+				# Restoring the move
+				self._board[fromPosition] = self._board[toPosition]
+				self._board[toPosition] = captured
+				if captured is not None:
+					self._players[self.get_opponent(player)].append(captured)
+
+		return checkmated
 
 	def make_move(self, fromPosition, toPosition):
 		"""Takes two strings that represent the squares to move from and the square to move to.

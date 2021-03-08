@@ -187,6 +187,45 @@ class TestJanggiGame(unittest.TestCase):
 		self.assertFalse(game.is_in_check("RED"))
 		self.assertTrue(game.is_in_check("BLUE"))
 
+	def test_is_checkmate(self):
+		"""Testing the is_checkmate method."""
+
+		game = JanggiGame()
+
+		self.assertFalse(game.is_checkmate("RED"))
+		self.assertFalse(game.is_checkmate("BLUE"))
+
+		# Move two Blue soldier to (2, 3) and (2, 5) and
+		# Move Blue Chariot 1 to (2, 4)
+		game._board[(2, 3)] = game._board[(6, 2)]
+		game._board[(6, 2)] = None
+		game._board[(2, 5)] = game._board[(6, 6)]
+		game._board[(6, 6)] = None
+		game._board[(2, 4)] = game._board[(9, 0)]
+		game._board[(9, 0)] = None
+		# self.assertTrue(game.is_in_check("RED"))
+		# self.assertTrue(game.is_checkmate("RED"))
+		# self.assertFalse(game.is_in_check("BLUE"))
+		# self.assertFalse(game.is_checkmate("BLUE"))
+
+		# Move Red Cannon 2 to (5, 4)
+		game._board[(5, 4)] = game._board[(2, 7)]
+		game._board[(2, 7)] = None
+		# self.assertTrue(game.is_in_check("BLUE"))
+		# self.assertFalse(game.is_checkmate("BLUE"))
+
+		# Move Red Chariot 1 to (7, 2)
+		game._board[(7, 2)] = game._board[(0, 0)]
+		game._board[(0, 0)] = None
+		# self.assertTrue(game.is_in_check("BLUE"))
+		# self.assertFalse(game.is_checkmate("BLUE"))
+
+		# Move Red Chariot 2 to (8, 6)
+		game._board[(8, 6)] = game._board[(0, 8)]
+		game._board[(0, 8)] = None
+		self.assertTrue(game.is_in_check("BLUE"))
+		self.assertTrue(game.is_checkmate("BLUE"))
+
 class TestGeneral(unittest.TestCase):
 	"""Testing the General class."""
 
