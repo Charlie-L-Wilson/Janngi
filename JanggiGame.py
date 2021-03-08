@@ -873,21 +873,21 @@ class Soldier(GamePiece):
 class InvalidPositionError(Exception):
 	"""Raised when the input position of the board is invalid."""
 	pass
-
-def main():
-	game = JanggiGame()
-	while game.get_game_state() == "UNFINISHED":
-		game.print_board()
-		validInput = False
-		while not validInput:
-			fromSquare = input("Where are you moving from? ")
-			toSquare = input("Where are you moving to? ")
-			if game.make_move(fromSquare, toSquare):
-				validInput = True
-			else:
-				print("The move is invalid. Try again!")
-				print()
-
-
-if __name__ == "__main__":
-	main()
+#
+# def main():
+# 	game = JanggiGame()
+# 	while game.get_game_state() == "UNFINISHED":
+# 		game.print_board()
+# 		validInput = False
+# 		while not validInput:
+# 			fromSquare = input("Where are you moving from? ")
+# 			toSquare = input("Where are you moving to? ")
+# 			if game.make_move(fromSquare, toSquare):
+# 				validInput = True
+# 			else:
+# 				print("The move is invalid. Try again!")
+# 				print()
+#
+#
+# if __name__ == "__main__":
+# 	main()
