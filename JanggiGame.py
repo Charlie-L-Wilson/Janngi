@@ -149,6 +149,9 @@ class JanggiGame:
 		for gamePiece in self._players[self.get_opponent(player)]:
 			for move in gamePiece.legal_moves(self._board, self.get_position(gamePiece)):
 				if self._board[move] == self._players[player][0]:
+					print("Player:", player)
+					print("Game piece:", gamePiece.get_name(), "at", self.get_position(gamePiece))
+					print("Returning True for this move", move)
 					checked = True
 
 		return checked
@@ -875,21 +878,47 @@ class Soldier(GamePiece):
 class InvalidPositionError(Exception):
 	"""Raised when the input position of the board is invalid."""
 	pass
-#
-# def main():
-# 	game = JanggiGame()
-# 	while game.get_game_state() == "UNFINISHED":
-# 		game.print_board()
-# 		validInput = False
-# 		while not validInput:
-# 			fromSquare = input("Where are you moving from? ")
-# 			toSquare = input("Where are you moving to? ")
-# 			if game.make_move(fromSquare, toSquare):
-# 				validInput = True
-# 			else:
-# 				print("The move is invalid. Try again!")
-# 				print()
-#
-#
-# if __name__ == "__main__":
-# 	main()
+
+def main():
+	game = JanggiGame()
+	# while game.get_game_state() == "UNFINISHED":
+	# 	game.print_board()
+	# 	validInput = False
+	# 	while not validInput:
+	# 		fromSquare = input("Where are you moving from? ")
+	# 		toSquare = input("Where are you moving to? ")
+	# 		if game.make_move(fromSquare, toSquare):
+	# 			validInput = True
+	# 		else:
+	# 			print("The move is invalid. Try again!")
+	# 			print()
+	# game.make_move('c7', 'c6')
+	# print("Is Red in checked?", game.is_in_check("RED"))
+	# print("Is Blue in checked?", game.is_in_check("BLUE"))
+	# game.make_move('c1', 'd3')
+	# print("Is Red in checked?", game.is_in_check("RED"))
+	# print("Is Blue in checked?", game.is_in_check("BLUE"))
+	# game.make_move('b10', 'd7')
+	# print("Is Red in checked?", game.is_in_check("RED"))
+	# print("Is Blue in checked?", game.is_in_check("BLUE"))
+	# game.make_move('b3', 'e3')
+	# print("Is Red in checked?", game.is_in_check("RED"))
+	# print("Is Blue in checked?", game.is_in_check("BLUE"))
+	# game.make_move('c10', 'd8')
+	# print("Is Red in checked?", game.is_in_check("RED"))
+	# print("Is Blue in checked?", game.is_in_check("BLUE"))
+	# game.make_move('h1', 'g3')
+	# # game.print_board()
+	# print("Is Red in checked?", game.is_in_check("RED"))
+	# print("Is Blue in checked?", game.is_in_check("BLUE"))
+	# game.make_move('e7', 'e6')
+	# # game.print_board()
+	# print("Is Red in checked?", game.is_in_check("RED"))
+	# print("Is Blue in checked?", game.is_in_check("BLUE"))
+	# game.make_move('e3', 'e6')
+	# # game.print_board()
+	# print("Is Red in checked?", game.is_in_check("RED"))
+	# print("Is Blue in checked?", game.is_in_check("BLUE"))
+
+if __name__ == "__main__":
+	main()
