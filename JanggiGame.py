@@ -258,7 +258,7 @@ class JanggiGame:
 			self._board[toPosition] = self._board[fromPosition]
 			self._board[fromPosition] = None
 			if captured is not None:
-				self._players[self.get_opponent(player)].remove(captured)
+				self._players[self.get_opponent(self._turn)].remove(captured)
 
 			# Check if the player put himself/herself in check
 			if self.is_in_check(self._turn):
@@ -267,7 +267,7 @@ class JanggiGame:
 				self._board[fromPosition] = self._board[toPosition]
 				self._board[toPosition] = captured
 				if captured is not None:
-					self._players[self.get_opponent(player)].append(captured)
+					self._players[self.get_opponent(self._turn)].append(captured)
 				return False
 
 		if self.is_checkmate(self.get_opponent(self._turn)):
