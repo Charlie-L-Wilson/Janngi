@@ -211,6 +211,8 @@ class JanggiGame:
 		return False if the move is illegal. Otherwise make the indicated move, remove any captured piece,
 		update the game state, update whose turn it is, and return True."""
 
+		print("Attempting: ", fromSquare, "->", toSquare)
+
 		# Check if the game has already been won
 		if self._status != "UNFINISHED":
 			return False
