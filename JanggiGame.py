@@ -79,6 +79,10 @@ class JanggiGame:
 		"""Return the current state of the game, which can be "UNFINISHED" or "RED_WON" or "BLUE_WON"."""
 		return self._status
 
+	def get_turn(self):
+		"""Return the player who should be playing at this turn. Returns either "RED" or "BLUE"."""
+		return self._turn
+
 	def get_position(self, GamePieceObj):
 		"""Given a game piece object, return the current position on the board.
 		Return None if the game piece is no longer on the board."""
@@ -97,12 +101,12 @@ class JanggiGame:
 		if not 'A' <= Square[0] <= 'I' and not 'a' <= Square[0] <= 'i':
 			raise InvalidPositionError
 
-		if not '0' <= Square[1] <= '9':
-			raise InvalidPositionError
-
 		if len(Square) == 3:
 			if Square[1:] != '10':
 				raise InvalidPositionError
+
+		if len(Square) == 2 and not '1' <= Square[1] <= '9':
+			raise InvalidPositionError
 
 		row = int(Square[1:]) - 1
 		column = ord(Square[0].upper()) - 65
@@ -174,13 +178,19 @@ class JanggiGame:
 			while j < len(legalMoves) and checkmated:
 				move = legalMoves[j]
 				j += 1
+
 				toPosition = move
 				fromPosition = self.get_position(gamePiece)
+
+				if toPosition == fromPosition:
+					continue
+
 				captured = self._board[toPosition]
 
 				# Making the move
 				self._board[toPosition] = self._board[fromPosition]
 				self._board[fromPosition] = None
+
 				if captured is not None:
 					self._players[self.get_opponent(player)].remove(captured)
 
@@ -196,22 +206,30 @@ class JanggiGame:
 
 		return checkmated
 
-	def make_move(self, fromPosition, toPosition):
+	def make_move(self, fromSquare, toSquare):
 		"""Takes two strings that represent the squares to move from and the square to move to.
 		return False if the move is illegal. Otherwise make the indicated move, remove any captured piece,
 		update the game state, update whose turn it is, and return True."""
 
 		# Check if the game has already been won
-
-		# If the square being moved from and moved to are the same, then it means the player is pass his/her turn.
+		if self._status != "UNFINISHED":
+			return False
 
 		# Convert the squares moving from and moving to a 2-tuple
+		try:
+			fromPosition = self.convert_position_to_tuple(fromSquare)
+			toPosition = self.convert_position_to_tuple(toSquare)
+		except InvalidPositionError:
+			return False
 
 		# Check if the square moving from contains a game piece
+		if self._board[fromPosition] is None:
+			return False
 
 		# Check if the square moving from is own by the current player
-
-		# --------------------------------------------------------------------------------------------------------------
+		if self._board[fromPosition].get_player() != self._turn:
+			return False
+		#--------------------------------------------------------------------------------------------------------------
 		# DETAILED TEXT DESCRIPTIONS OF HOW TO HANDLE THE SCENARIOS
 		# 3. Determining how to validate a given move according to the rules for each piece,
 		#        turn taking and other game rules.
@@ -223,10 +241,46 @@ class JanggiGame:
 		# --------------------------------------------------------------------------------------------------------------
 
 		# Check if the square moving to is one of the legal moves that can be made by the game piece at fromPosition
+		if toPosition not in self._board[fromPosition].legal_moves(self._board, fromPosition):
+			return False
 
 		# Check if the move puts the player's own general in check
 
-		# --------------------------------------------------------------------------------------------------------------
+		# If the square being moved from and moved to are the same, then it means the player is pass his/her turn.
+		if toPosition == fromPosition:
+
+			if self.is_in_check(self._turn):
+				return False
+
+		else:
+			# Making the move
+			captured = self._board[toPosition]
+			self._board[toPosition] = self._board[fromPosition]
+			self._board[fromPosition] = None
+			if captured is not None:
+				self._players[self.get_opponent(player)].remove(captured)
+
+			# Check if the player put himself/herself in check
+			if self.is_in_check(self._turn):
+
+				# Restoring the move
+				self._board[fromPosition] = self._board[toPosition]
+				self._board[toPosition] = captured
+				if captured is not None:
+					self._players[self.get_opponent(player)].append(captured)
+				return False
+
+		if self.is_checkmate(self.get_opponent(self._turn)):
+			if self._turn == "RED":
+				self._status = "RED_WON"
+			else:
+				self._status = "BLUE_WON"
+
+		self._turn = self.get_opponent(self._turn)
+
+		return True
+
+
 		# DETAILED TEXT DESCRIPTIONS OF HOW TO HANDLE THE SCENARIOS
 		# 4. Modifying the board state after each move.
 		#    If the opponent have a game piece at the toPosition, then it will be removed from the opponent's inventory.
@@ -254,7 +308,7 @@ class JanggiGame:
 			# Check if the opponent has been checkmated by calling the is_checkmate method.
 			# If so, then update the game state to either RED_WON or BLUE_WON
 			# If not, then update whose turn it is by calling the switch_turn method.
-		pass
+		return True
 
 	def print_board(self):
 		"""Print the game board on the screen."""
@@ -289,8 +343,8 @@ class JanggiGame:
 		                        4: cellForPrint(max_spaces, "[ ]", '=', '='),
 		                        5: cellForPrint(max_spaces, "[ ]", '=', '-')}
 
-		empty_row = (row_spacer + cellForPrint(max_spaces, "|", num_cell=self._columns) + "\n") * 3
-		empty_row_fortress = (row_spacer + cellForPrint(max_spaces, "|", num_cell=self._columns//2-1) + cellForPrint(max_spaces, "║", num_cell=self._columns//2-1) + cellForPrint(max_spaces, "|", num_cell=self._columns//2-1) + '\n') * 3
+		empty_row = (row_spacer + cellForPrint(max_spaces, "|", num_cell=self._columns) + "\n") * 2
+		empty_row_fortress = (row_spacer + cellForPrint(max_spaces, "|", num_cell=self._columns//2-1) + cellForPrint(max_spaces, "║", num_cell=self._columns//2-1) + cellForPrint(max_spaces, "|", num_cell=self._columns//2-1) + '\n') * 2
 
 		print()
 		print("ROW  " + cellForPrint(max_spaces, '', num_cell=4) + cellForPrint(max_spaces, "COLUMN", ' ', ' '))
@@ -322,6 +376,13 @@ class JanggiGame:
 				print(empty_row_fortress, end="")
 			else:
 				print(empty_row, end="")
+
+		print()
+		print("Game state:", self._status)
+
+		if self._status == "UNFINISHED":
+			print(f"It is now {self._turn}'s turn!\n")
+		print()
 
 class GamePiece:
 	"""A class that represent individual game piece"""
@@ -411,6 +472,7 @@ class General(GamePiece):
 
 		# All vertical and horizontal moves
 		legalMoves = set()
+
 		for i in range(-1, 2):
 			for j in range(-1, 2):
 				if abs(i + j) == 1:
@@ -428,6 +490,7 @@ class General(GamePiece):
 			if board[move] is not None and board[move].get_player() == self._player:
 				legalMoves.remove(move)
 
+		legalMoves.add(current_position)
 		return legalMoves
 
 class Guard(GamePiece):
@@ -448,6 +511,7 @@ class Guard(GamePiece):
 
 		# All vertical and horizontal moves
 		legalMoves = set()
+
 		for i in range(-1, 2):
 			for j in range(-1, 2):
 				if abs(i + j) == 1:
@@ -464,6 +528,8 @@ class Guard(GamePiece):
 		for move in list(legalMoves):
 			if board[move] is not None and board[move].get_player() == self._player:
 				legalMoves.remove(move)
+
+		legalMoves.add(current_position)
 
 		return legalMoves
 
@@ -485,6 +551,8 @@ class Horse(GamePiece):
 		Return all legal moves that the Horse can play next."""
 
 		legalMoves = set()
+		legalMoves.add(current_position)
+
 		x, y = current_position
 		for i in range(-1, 2):
 			for j in range(-1, 2):
@@ -528,6 +596,8 @@ class Elephant(GamePiece):
 		Return all legal moves that the Elephant can play next."""
 
 		legalMoves = set()
+		legalMoves.add(current_position)
+
 		x, y = current_position
 		for i in range(-1, 2):
 			for j in range(-1, 2):
@@ -634,6 +704,8 @@ class Chariot(GamePiece):
 			return moves
 
 		legalMoves = set()
+		legalMoves.add(current_position)
+
 		for axis in [0, 1]:
 			for direction in [-1, 1]:
 				legalMoves = legalMoves.union(orthogonal_check(current_position, axis, direction))
@@ -726,7 +798,7 @@ class Cannon(GamePiece):
 			return moves
 
 		legalMoves = set()
-		legalMoves = jump_over_check(current_position, 0, 1)
+		legalMoves.add(current_position)
 
 		for axis in [0, 1]:
 			for direction in [-1, 1]:
@@ -775,6 +847,7 @@ class Soldier(GamePiece):
 			return tuple(position_list)
 
 		legalMoves = set()
+		legalMoves.add(current_position)
 
 		if self._player == "RED":
 			direction = 1
@@ -800,3 +873,21 @@ class Soldier(GamePiece):
 class InvalidPositionError(Exception):
 	"""Raised when the input position of the board is invalid."""
 	pass
+
+def main():
+	game = JanggiGame()
+	while game.get_game_state() == "UNFINISHED":
+		game.print_board()
+		validInput = False
+		while not validInput:
+			fromSquare = input("Where are you moving from? ")
+			toSquare = input("Where are you moving to? ")
+			if game.make_move(fromSquare, toSquare):
+				validInput = True
+			else:
+				print("The move is invalid. Try again!")
+				print()
+
+
+if __name__ == "__main__":
+	main()
