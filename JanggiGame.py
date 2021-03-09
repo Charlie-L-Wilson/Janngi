@@ -840,7 +840,7 @@ class InvalidPositionError(Exception):
 	"""Raised when the input position of the board is invalid."""
 	pass
 
-
+# Try me!!!
 # def game_console():
 # 	"""Game console to activate the game to be played."""
 # 	game = JanggiGame()
