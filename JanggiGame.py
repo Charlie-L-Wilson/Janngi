@@ -1,41 +1,32 @@
+# Author:           Chi Hang Leung
+# Date:             03/09/2021
+# Description:      A complete Janggi game that can be played on the terminal.
+
+
 class JanggiGame:
-	"""A class that represent the Janggi game board"""
+	"""A class that represent the Janggi game board.
+	Includes methods to move a move on the Janggi board and print out the Janggi board on the terminal."""
 
 	def __init__(self):
-		"""Initiated the Janggi Game Board"""
-		# --------------------------------------------------------------------------------------------------------------
-		# DETAILED TEXT DESCRIPTIONS OF HOW TO HANDLE THE SCENARIOS
-		#
-		# 1. Initializing the board
-		#    The board will be setup as a dictionary where the key is represented as a 2-tuple (x, y),
-		#    where x represents the row and y represents the column.
-		# --------------------------------------------------------------------------------------------------------------
+		"""Instantiated the Janggi Game Board. Takes no parameters and initiate all game pieces for each player."""
 
-		# Set board size: 10 rows and 9 columns
+		# Board size: 10 rows and 9 columns
 		self._rows = 10
 		self._columns = 9
 
-		# Creating an empty dictionary to represent the board
-		# Set up the board
-			# Go though each row and column of the board
-				# Add each position to the board
-					# Key: the position as a 2-tuple (e.g. (0, 0) )
-					# Value: None
+		# Representing the Janggi board as a dictionary:
+			# Key:      the position of the game piece as a 2-tuple [e.g. (0, 0) for A1].
+			# Value:    the object of the game piece
 		self._board = {(i, j): None for i in range(self._rows) for j in range(self._columns)}
-
-		# --------------------------------------------------------------------------------------------------------------
-		# DETAILED TEXT DESCRIPTIONS OF HOW TO HANDLE THE SCENARIOS
-		#
-		# 2. Determining how to represent pieces at a given location on the board.
-		#    A location on the board will be represented as a 2-tuple (x, y) as stored in the board as a dictionary.
-		#    The value of the dictionary holds the object of the game piece, such as the General object.
-		#    If the position has no game piece, then the value is None
-		# --------------------------------------------------------------------------------------------------------------
 
 		# Create a dictionary to represent the players and the game pieces thay currently hold.
 				# Key: the player, either "RED" or "BLUE".
 				# Value: a list that contains all the game pieces hold by each player.
 
+		# Representing all games pieces that each player holds as a dictionary:
+			# Key:      the player (either BLUE or RED)
+			# Value:    the object of the game piece
+		# Create all game pieces for each player store in the dictionary.
 		self._players = {player: [General(player, 0),
 		                          Guard(player, 0), Guard(player, 1),
 		                          Horse(player, 0), Horse(player, 1),
@@ -46,133 +37,128 @@ class JanggiGame:
 		                          Soldier(player, 2), Soldier(player, 3), Soldier(player, 4)]
 		                 for player in ["BLUE", "RED"]}
 
-		# For player RED and BLUE, creating the objects for all game pieces.
-			# For each game piece of each player
-				# Add the game piece to the board at their corresponding starting positions.
+		# Add each game piece of each player to the board at their corresponding starting positions.
 		for player in self._players:
 			for game_piece in self._players[player]:
 				self._board[game_piece.get_starting_position()] = game_piece
 
-		# Set player's Turn: Blue plays first
+		# Blue always plays first
 		self._turn = "BLUE"
 
-		# Set Game Status as "UNFINISHED". Game Status can be 'UNFINISHED' or 'RED_WON' or 'BLUE_WON'.
+		# Game Status started as "UNFINISHED". Game Status can be 'UNFINISHED' or 'RED_WON' or 'BLUE_WON'.
 		self._status = "UNFINISHED"
 
 	def get_rows(self):
-		"""Return the number of rows of the game board."""
+		"""Returns the number of rows of the game board."""
 		return self._rows
 
 	def get_columns(self):
-		"""Return the number of columns of the game board."""
+		"""Returns the number of columns of the game board."""
 		return self._columns
 
 	def get_board(self):
-		"""Return the current game board as an dictionary."""
+		"""Returns the entire dictionary representing the game board."""
 		return self._board
 
 	def get_players(self):
-		"""Return the dictionary for the current players, which holds what game pieces they currently hold."""
+		"""Return the entire dictionary holding all the game pieces for each player."""
 		return self._players
 
-	def get_game_state(self):
-		"""Return the current state of the game, which can be "UNFINISHED" or "RED_WON" or "BLUE_WON"."""
-		return self._status
-
 	def get_turn(self):
-		"""Return the player who should be playing at this turn. Returns either "RED" or "BLUE"."""
+		"""Returns the player who should be playing at this turn, either "RED" or "BLUE"."""
 		return self._turn
 
-	def get_position(self, GamePieceObj):
-		"""Given a game piece object, return the current position on the board.
-		Return None if the game piece is no longer on the board."""
+	def get_game_state(self):
+		"""Returns the current state of the game, which can be either "UNFINISHED", "RED_WON" or "BLUE_WON"."""
+		return self._status
 
+	def get_position(self, GamePieceObject):
+		"""Takes a game piece object as parameter and returns its position on the board.
+		Return None if the game piece has been captured and is no longer on the board."""
 		for position in self._board:
-			if self._board[position] is GamePieceObj:
+			if self._board[position] is GamePieceObject:
 				return position
 		return None
 
-	def convert_position_to_tuple(self, Square):
-		"""Convert a position (a string) entered by the player to the tuple format. e.g. "A1" to (0, 0)"""
+	def convert_position(self, square):
+		"""Takes a position (a string), represented by column (A-I) and rows (1-10), and
+		returns the position in a 2-tuple format (i, j),
+		where i represents the row (0 - 9) and j represents the column (0 - 8)."""
 
-		if len(Square) > 3 or len(Square) <= 1:
+		# Square must be between 2 - 3 characters in length
+		if len(square) > 3 or len(square) <= 1:
 			raise InvalidPositionError
 
-		if not 'A' <= Square[0] <= 'I' and not 'a' <= Square[0] <= 'i':
+		# The first character must be an alphabet
+		if not 'A' <= square[0] <= 'I' and not 'a' <= square[0] <= 'i':
 			raise InvalidPositionError
 
-		if len(Square) == 3:
-			if Square[1:] != '10':
+		# Only A10 to I10 should have position (square) with 3 characters.
+		if len(square) == 3:
+			if square[1:] != '10':
 				raise InvalidPositionError
 
-		if len(Square) == 2 and not '1' <= Square[1] <= '9':
+		# The second letter much be a digit
+		if len(square) == 2 and not '1' <= square[1] <= '9':
 			raise InvalidPositionError
 
-		row = int(Square[1:]) - 1
-		column = ord(Square[0].upper()) - 65
-
+		# Convert string position (square) to the 2-tuple format.
+		row = int(square[1:]) - 1
+		column = ord(square[0].upper()) - 65
 		return (row, column)
 
-	def convert_position_to_string(self, Square):
-		"""Convert a position in a 2-tuple format to the string format. e.g. (0, 0) to "A1" """
-
-		row, column = Square
-		return chr(column + 65) + str(row + 1)
-
 	def get_opponent(self, player):
-		"""Alternate the current turn of the player.
-		If the player is RED, then it will return BLUE.
-		If the player is BLUE, then it will return RED."""
-		# --------------------------------------------------------------------------------------------------------------
-		# DETAILED TEXT DESCRIPTIONS OF HOW TO HANDLE THE SCENARIOS
-		# 5. Determining how to track which player's turn it is to play right now.
-		#    At the end of make_move method, the game will continue if no one has won yet.
-		#    The make_move will set the current player's turn to the opponent by calling the switch_turn method.
-		# --------------------------------------------------------------------------------------------------------------
-		if player == "BLUE":
-			return "RED"
-		elif player == "RED":
-			return "BLUE"
+		"""Takes the player, either "RED" or "BLUE", of the game as parameter and return his/her opponent."""
+		return "RED" if player == "BLUE" else "BLUE"
+
+	def try_move(self, fromPosition, toPosition):
+		"""Takes the from and to position as parameters and attempt to make the move. Returns the captured game piece.
+		"""
+
+		captured = self._board[toPosition]
+		self._board[toPosition] = self._board[fromPosition]
+		self._board[fromPosition] = None
+		if captured is not None:
+			self._players[captured.get_player()].remove(captured)
+		return captured
+
+	def restore_move(self, fromPosition, toPosition, captured):
+		"""Takes the from and to position and the captured game piece as parameters and
+		restore the previously made move. Returns None."""
+
+		self._board[fromPosition] = self._board[toPosition]
+		self._board[toPosition] = captured
+		if captured is not None:
+			self._players[captured.get_player()].append(captured)
 
 	def is_in_check(self, player):
-		"""Takes player, either 'RED' or 'BLUE" and
-		returns True if that player is in check and return False otherwise."""
-		# Make the move and save the position and object of the game piece if it is being captured.
-		# Go though all game pieces held by the opponent
-			# Extract all possible positions and determine if any of them equal to the position of the General.
-				# Return True if there is at least one move that can capture the general.
-				# Return False if there is no possible moves that can capture the general.
-		# Reverse making the move
+		"""Takes the player, either "RED" or "BLUE", as the parameter, and
+		returns True if that player is in check (could be captured on the opposing player's next move).
+		Return False otherwise."""
 
+		# Converting all input player as upper case
 		player = player.upper()
 
+		# Iterate every legal moves of every game piece held by the opponent and
+		# check if there is a move that can capture the player's general.
 		checked = False
-
 		for gamePiece in self._players[self.get_opponent(player)]:
 			for move in gamePiece.legal_moves(self._board, self.get_position(gamePiece)):
 				if self._board[move] == self._players[player][0]:
-					print("Player:", player)
-					print("Game piece:", gamePiece.get_name(), "at", self.get_position(gamePiece))
-					print("Returning True for this move", move)
 					checked = True
-
 		return checked
 
 	def is_checkmate(self, player):
-		"""Takes the player as the parameter and determine if the player has been checkmate."""
-		# --------------------------------------------------------------------------------------------------------------
-		# DETAILED TEXT DESCRIPTIONS OF HOW TO HANDLE THE SCENARIOS
-		# 6. Determining how to detect the checkmate scenario.
-		#    Go though all game pieces held by the opponent and determine all legal moves.
-		#    If there is no legal moves that the opponent can make to get out of being in check,
-		#    then the opponent has been checkmated.
-		# --------------------------------------------------------------------------------------------------------------
+		"""Takes the player, either "RED" or "BLUE", as the parameter,
+		 and returns True if the player has been checkmated. Returns False otherwise."""
 
+		# If the player is not being in check, then it is not checkmated.
 		if not self.is_in_check(player):
 			return False
 
+		# Iterate every legal move of every game piece held by the player.
+		# The player is not checkmated if there exists a move that can get out of being in check.
 		checkmated = True
-
 		i = 0
 		while i < len(self._players[player]) and checkmated:
 			gamePiece = self._players[player][i]
@@ -181,190 +167,142 @@ class JanggiGame:
 			legalMoves = list(gamePiece.legal_moves(self._board, self.get_position(gamePiece)))
 			j = 0
 			while j < len(legalMoves) and checkmated:
-				move = legalMoves[j]
+				toPosition = legalMoves[j]
+				fromPosition = self.get_position(gamePiece)
 				j += 1
 
-				toPosition = move
-				fromPosition = self.get_position(gamePiece)
-
+				# Do not attempt to make the move if the player is passing the turn.
 				if toPosition == fromPosition:
 					continue
 
-				captured = self._board[toPosition]
-
-				# Making the move
-				self._board[toPosition] = self._board[fromPosition]
-				self._board[fromPosition] = None
-
-				if captured is not None:
-					self._players[self.get_opponent(player)].remove(captured)
+				# Attempts at making the move
+				captured = self.try_move(fromPosition, toPosition)
 
 				# Check if the player is still being in check
 				if not self.is_in_check(player):
 					checkmated = False
 
 				# Restoring the move
-				self._board[fromPosition] = self._board[toPosition]
-				self._board[toPosition] = captured
-				if captured is not None:
-					self._players[self.get_opponent(player)].append(captured)
+				self.restore_move(fromPosition, toPosition, captured)
 
 		return checkmated
 
 	def make_move(self, fromSquare, toSquare):
-		"""Takes two strings that represent the squares to move from and the square to move to.
-		return False if the move is illegal. Otherwise make the indicated move, remove any captured piece,
-		update the game state, update whose turn it is, and return True."""
-
-		print("Attempting: ", fromSquare, "->", toSquare)
+		"""Takes from and to squares (positions in strings). Return False if the move is illegal.
+		Otherwise make the indicated move, remove any captured piece from the player,
+		check if the opponent has been checkmate, update the game state, update whose turn it is, and return True."""
 
 		# Check if the game has already been won
 		if self._status != "UNFINISHED":
 			return False
 
-		# Convert the squares moving from and moving to a 2-tuple
+		# Convert the squares moving from and moving into a 2-tuple format
 		try:
-			fromPosition = self.convert_position_to_tuple(fromSquare)
-			toPosition = self.convert_position_to_tuple(toSquare)
+			fromPosition = self.convert_position(fromSquare)
+			toPosition = self.convert_position(toSquare)
 		except InvalidPositionError:
 			return False
 
-		# Check if the square moving from contains a game piece
+		# Check if the position moving from contains a game piece
 		if self._board[fromPosition] is None:
 			return False
 
 		# Check if the square moving from is own by the current player
 		if self._board[fromPosition].get_player() != self._turn:
 			return False
-		#--------------------------------------------------------------------------------------------------------------
-		# DETAILED TEXT DESCRIPTIONS OF HOW TO HANDLE THE SCENARIOS
-		# 3. Determining how to validate a given move according to the rules for each piece,
-		#        turn taking and other game rules.
-		#    Each game piece is inheriting the GamePiece class and have a their own legal_moves method,
-		#    which takes the board and current position as a parameter and
-		#    determine what positions are legal moves for that piece.
-		#    legal_moves method will be called, via duck typing, by JanggiGame.make_move
-		#    to ensure the toPosition is one of the legal moves that the piece can perform.
-		# --------------------------------------------------------------------------------------------------------------
 
-		# Check if the square moving to is one of the legal moves that can be made by the game piece at fromPosition
+		# Check if the position moving to is one of the legal moves that can be made by the game piece at fromPosition
 		if toPosition not in self._board[fromPosition].legal_moves(self._board, fromPosition):
 			return False
 
-		# Check if the move puts the player's own general in check
-
-		# If the square being moved from and moved to are the same, then it means the player is pass his/her turn.
+		# If the position being moved from and moved to are the same, then it means the player is pass his/her turn.
 		if toPosition == fromPosition:
 
+			# However, the player must play if he or she is being in check.
 			if self.is_in_check(self._turn):
 				return False
 
+		# Making the move
 		else:
 			# Making the move
-			captured = self._board[toPosition]
-			self._board[toPosition] = self._board[fromPosition]
-			self._board[fromPosition] = None
-			if captured is not None:
-				self._players[self.get_opponent(self._turn)].remove(captured)
+			captured = self.try_move(fromPosition, toPosition)
 
 			# Check if the player put himself/herself in check
 			if self.is_in_check(self._turn):
 
 				# Restoring the move
-				self._board[fromPosition] = self._board[toPosition]
-				self._board[toPosition] = captured
-				if captured is not None:
-					self._players[self.get_opponent(self._turn)].append(captured)
+				self.restore_move(fromPosition, toPosition, captured)
 				return False
 
+		# Determine if the opponent has been checkmated. If so, update the game status.
 		if self.is_checkmate(self.get_opponent(self._turn)):
 			if self._turn == "RED":
 				self._status = "RED_WON"
 			else:
 				self._status = "BLUE_WON"
 
+		# Switch player's turn
 		self._turn = self.get_opponent(self._turn)
-
-		return True
-
-
-		# DETAILED TEXT DESCRIPTIONS OF HOW TO HANDLE THE SCENARIOS
-		# 4. Modifying the board state after each move.
-		#    If the opponent have a game piece at the toPosition, then it will be removed from the opponent's inventory.
-		#    First replace the game piece object in the toPosition, which will replace any game piece at toPosition.
-		#    Then put the value None at the fromPosition.
-		#    Check if the opponent has been checkmated.
-		#    If so, then the game is over and status will be updated to RED_WON or BLUE_WON.
-		#    If not, then the game continues and update whose turn it is.
-		# --------------------------------------------------------------------------------------------------------------
-
-		# Make the indicated move
-
-			# If there is an game piece in the toPosition, then remove it from the opponent's holding.
-			# Put the Game Piece in the fromPosition in the toPosition.
-			# Put None in the fromPosition
-
-			# ----------------------------------------------------------------------------------------------------------
-			# DETAILED TEXT DESCRIPTIONS OF HOW TO HANDLE THE SCENARIOS
-			# 7. Determining which player has won and also figuring out when to check that.
-			#    Once it has been determined that the opponent has been checkmated,
-			#    then the game has been won by the current player.
-			#    The game status will be changed from UNFINISHED to RED_WON or BLUE_WON.
-			# ----------------------------------------------------------------------------------------------------------
-
-			# Check if the opponent has been checkmated by calling the is_checkmate method.
-			# If so, then update the game state to either RED_WON or BLUE_WON
-			# If not, then update whose turn it is by calling the switch_turn method.
 		return True
 
 	def print_board(self):
-		"""Print the game board on the screen."""
-
-		# Go through the dictionary (row, column)
-			# Print empty space if there is no game piece at the position
-			# Print the name of the game piece if the game piece exist
-		# max_spaces = 8
+		"""Print the game board, game status, player's turn, and if anyone is being in check on the terminal
+		with colored game pieces (Blue or Red)."""
 
 		def cellForPrint(max_spaces, center, left_filler=' ', right_filler=' ', num_cell=1):
 			"""Take the maxium number of spaces occupied, the string at the center,
 			filler characters on the left and on the right, and the number of repeated cells as parameters.
-			Returns the string that print a standardized cell for printing on the terminal."""
+			Returns a standardized cell (a string) to be printed on the terminal."""
 			left = (max_spaces - len(center)) // 2
 			right = max_spaces - len(center) - left
 			cell = left * left_filler + center + right * right_filler
 			return cell * num_cell
 
+		# Each cell should have 13 characters in width and leaving 5 spaces to show the numbering of the rows.
 		max_spaces = 13
 		row_spaces = 5
 
+		# Define the locations of the fortresses
 		fortress_red = [(i, j) for i in range(0, 3) for j in range(3, 6)]
 		fortress_blue = [(i, j) for i in range(7, 10) for j in range(3, 6)]
 		fortress = fortress_red + fortress_blue
 
+		# Spacer for numbering the rows
 		row_spacer = cellForPrint(row_spaces, '')
+
+		# Cells that represent the space where the game piece can go but there is no game piece at the moment.
 		empty_space = {"other": cellForPrint(max_spaces, "[ ]", '-', '-'),
 		               0: cellForPrint(max_spaces, "[ ]", ' ', '-'),
 		               self._columns - 1: cellForPrint(max_spaces, "[ ]", '-', ' ')}
 
+		# Cells that represent the fortress
 		empty_space_fortress = {3: cellForPrint(max_spaces, "[ ]", '-', '='),
 		                        4: cellForPrint(max_spaces, "[ ]", '=', '='),
 		                        5: cellForPrint(max_spaces, "[ ]", '=', '-')}
 
+		# Create rows to space apart the rows where there game pieces can go.
 		empty_row = (row_spacer + cellForPrint(max_spaces, "|", num_cell=self._columns) + "\n") * 2
-		empty_row_fortress = (row_spacer + cellForPrint(max_spaces, "|", num_cell=self._columns//2-1) + cellForPrint(max_spaces, "║", num_cell=self._columns//2-1) + cellForPrint(max_spaces, "|", num_cell=self._columns//2-1) + '\n') * 2
+		empty_row_fortress = (row_spacer + cellForPrint(max_spaces, "|", num_cell=self._columns//2-1) +
+		                      cellForPrint(max_spaces, "║", num_cell=self._columns//2-1) +
+		                      cellForPrint(max_spaces, "|", num_cell=self._columns//2-1) + '\n') * 2
 
+		# Show label for the rows and columns
 		print()
 		print("ROW  " + cellForPrint(max_spaces, '', num_cell=4) + cellForPrint(max_spaces, "COLUMN", ' ', ' '))
 
+		# Show the column names from A to I
 		print(row_spacer, end="")
 		for i in range(self._columns):
 			print(cellForPrint(max_spaces, chr(i + 65), ' ', ' '), end="")
 		print()
 
-
+		# Print out the entire board
 		for i in range(self._rows):
+
+			# Numbering the rows
 			print(cellForPrint(row_spaces, str(i + 1)), end="")
 
+			# Print out each game piece if they exist. Otherwise, print empty cells.
 			for j in range(self._columns):
 				gamePiece = self._board[(i, j)]
 				if gamePiece:
@@ -376,6 +314,8 @@ class JanggiGame:
 						print(empty_space_fortress[j], end="")
 					else:
 						print(empty_space["other"], end="")
+
+			# Print spacer between rows
 			print()
 			if i == self._rows - 1:
 				continue
@@ -384,24 +324,32 @@ class JanggiGame:
 			else:
 				print(empty_row, end="")
 
+		# Show the status of the game.
 		print()
 		print("Game state:", self._status)
+		if self.is_in_check("BLUE"):
+			print("Blue is in check!!!")
+		elif self.is_in_check("RED"):
+			print("Red is in check!!!")
 
 		if self._status == "UNFINISHED":
 			print(f"It is now {self._turn}'s turn!\n")
 		print()
 
+
 class GamePiece:
-	"""A class that represent individual game piece"""
-	# Does not have set_player method as properties of the game piece cannot be changed.
+	"""A class that represent individual game piece."""
 
 	def __init__(self, player, identifier):
-		"""Initiate the game piece."""
-		# Player who own the piece, either RED or BLUE
+		"""Instantiate the game piece."""
 
+		# Player who own the game piece, either RED or BLUE
 		self._player = player
+
+		# The identifier for different game pieces of the same type
 		self._identifier = identifier
 
+		# Define the game piece's own fortress
 		if self._player == "RED":
 			fortress_row_start = 0
 			fortress_row_end = 3
@@ -412,8 +360,10 @@ class GamePiece:
 		fortress_column_start = 3
 		fortress_column_end = 6
 
-		self._fortress = {(i, j) for i in range(fortress_row_start, fortress_row_end) for j in range(fortress_column_start, fortress_column_end)}
+		self._fortress = {(i, j) for i in range(fortress_row_start, fortress_row_end)
+		                  for j in range(fortress_column_start, fortress_column_end)}
 
+		# Define a set of standard diagonal moves for the game piece.
 		self._diagonalMoves = {(1, 4): {(0, 3), (0, 5), (2, 3), (2, 5)},
 			                   (0, 3): {(1, 4)},
 			                   (0, 5): {(1, 4)},
@@ -426,23 +376,25 @@ class GamePiece:
 			                   (9, 5): {(8, 4)}}
 
 	def get_player(self):
-		"""Returns the player who own the piece."""
+		"""Returns the player who own the game piece."""
 		return self._player
 
 	def get_identifier(self):
-		"""Returns the identifier of the game piece"""
+		"""Returns the identifier of the game piece."""
 		return self._identifier
 
 	def get_fortress(self):
-		"""Return the set with all positions of the fortress based on the player."""
+		"""Return the set with all positions in the player's fortress."""
 		return self._fortress
 
 	def get_diagonalMoves(self, position):
-		"""Return a set of available diagonal moves possible by taking the current position as parameter. The position parameter must be a position where a diagonal move is possible."""
+		"""Takes a position as parameter and return a standard set of diagonal moves.
+		The position parameter must be a position where a diagonal move is possible."""
 		return self._diagonalMoves[position]
 
 	def get_starting_position(self):
-		"""Returns the starting position of the game piece based on what game piece it is, who owns the game piece, as well as the identifier of the game piece."""
+		"""Returns the starting position of the game piece
+		based on what game piece it is, who owns the game piece, and the identifier of the game piece."""
 		return self._starting_position[(self._player, self._name, self._identifier)]
 
 	def get_name(self):
@@ -450,18 +402,20 @@ class GamePiece:
 		return self._name
 
 	def print_name(self, max_space):
-		"""Print the name of the game piece on screen with appropriate spacing."""
+		"""Takes the maximum width as parameter and
+		print the name of the game piece with brackets on screen with appropriate spacing and color."""
 
 		if self._player == "RED":
 			ANSI_code = 31
-		elif self._player == "BLUE":
+		else:
 			ANSI_code = 34
 
-		max_space -= 2
+		max_space -= 2      # Preserve two spaces for the brackets
 		pre_space = (max_space - len(self._name)) // 2
 		post_space = max_space - len(self._name) - pre_space
 		gamePieceToPrint = '[' + pre_space * ' ' + self._name + post_space * ' ' + ']'
 		print(f'\033[{ANSI_code}m' + gamePieceToPrint + f'\033[0m', end="")
+
 
 class General(GamePiece):
 	"""A class that represent the General. Inherited from GamePiece."""
@@ -477,9 +431,9 @@ class General(GamePiece):
 		"""Takes the board and the current position as parameters.
 		Return all legal moves that the General can play next."""
 
-		# All vertical and horizontal moves
 		legalMoves = set()
 
+		# Add all vertical and horizontal moves
 		for i in range(-1, 2):
 			for j in range(-1, 2):
 				if abs(i + j) == 1:
@@ -497,8 +451,10 @@ class General(GamePiece):
 			if board[move] is not None and board[move].get_player() == self._player:
 				legalMoves.remove(move)
 
+		# Add the current position
 		legalMoves.add(current_position)
 		return legalMoves
+
 
 class Guard(GamePiece):
 	"""A class that represent the Guards. Inherited from GamePiece."""
@@ -516,28 +472,9 @@ class Guard(GamePiece):
 		"""Takes the board and the current position as parameters.
 		Return all legal moves that the Guard can play next."""
 
-		# All vertical and horizontal moves
-		legalMoves = set()
-
-		for i in range(-1, 2):
-			for j in range(-1, 2):
-				if abs(i + j) == 1:
-					legalMoves.add((current_position[0] + i, current_position[1] + j))
-
-		# Add any available diagonal moves
-		if current_position in self._diagonalMoves:
-			legalMoves = legalMoves.union(self._diagonalMoves[current_position])
-
-		# Remove all moves that are outside of the fortress
-		legalMoves = legalMoves.intersection(self._fortress)
-
-		# Remove all moves that are occupied by other game pieces own by the same player
-		for move in list(legalMoves):
-			if board[move] is not None and board[move].get_player() == self._player:
-				legalMoves.remove(move)
-
-		legalMoves.add(current_position)
-
+		# Mimick the movements of the general
+		mimic_general = General(self._player, 0)
+		legalMoves = mimic_general.legal_moves(board, current_position)
 		return legalMoves
 
 
@@ -557,34 +494,34 @@ class Horse(GamePiece):
 		"""Takes the board and the current position as parameters.
 		Return all legal moves that the Horse can play next."""
 
+		# Adding the current position
 		legalMoves = set()
 		legalMoves.add(current_position)
 
+		# First iterate all orthogonal move by 1 space to determine if it is being blocked
 		x, y = current_position
 		for i in range(-1, 2):
 			for j in range(-1, 2):
 				if abs(i + j) != 1:
 					continue
-
 				if (x + i, y + j) not in board:
 					continue
-
 				if board[(x + i, y + j)] is not None:
 					continue
 
+				# Then iterate all diagonal move by 1 square and add legal moves to the set.
 				for m in range(-1 + i, 2 + i):
 					for n in range(-1 + j, 2 + j):
 						if abs(m) + abs(n) != 3:
 							continue
-
 						if (x + m, y + n) not in board:
 							continue
-
 						if board[(x + m, y + n)] is not None and board[(x + m, y + n)].get_player() == self._player:
 							continue
-
 						legalMoves.add((x + m, y + n))
+
 		return legalMoves
+
 
 class Elephant(GamePiece):
 	"""A class that represent the Elephants. Inherited from GamePiece."""
@@ -602,49 +539,45 @@ class Elephant(GamePiece):
 		"""Takes the board and the current position as parameters.
 		Return all legal moves that the Elephant can play next."""
 
+		# Add the current position
 		legalMoves = set()
 		legalMoves.add(current_position)
 
+		# First iterate all orthogonal move by 1 space and see if it is being blocked
 		x, y = current_position
 		for i in range(-1, 2):
 			for j in range(-1, 2):
 				if abs(i + j) != 1:
 					continue
-
 				if (x + i, y + j) not in board:
 					continue
-
 				if board[(x + i, y + j)] is not None:
 					continue
 
+				# Then iterate all diagonal move by 1 square  and see if it is being blocked
 				for m in range(-1+i, 2+i):
 					for n in range(-1+j, 2+j):
-
 						if abs(m) + abs(n) != 3:
 							continue
-
 						if (x + m, y + n) not in board:
 							continue
-
 						if board[(x + m, y + n)] is not None:
 							continue
 
+						# Iterate one more diagonal move by 1 square and add all legal moves to the set
 						for p in range(-1 + m, 2 + m):
 							for q in range(-1 + n, 2 + n):
-
 								if abs(p) + abs(q) != 5:
 									continue
-
 								if (x + p, y + q) not in board:
 									continue
-
 								if board[(x + p, y + q)] is not None and board[
 									(x + p, y + q)].get_player() == self._player:
 									continue
-
 								legalMoves.add((x + p, y + q))
 
 		return legalMoves
+
 
 class Chariot(GamePiece):
 	"""A class that represent Chariots. Inherited from GamePiece."""
@@ -673,35 +606,37 @@ class Chariot(GamePiece):
 		Return all legal moves that the Chariot can play next."""
 
 		def orthogonal_check(position, axis, direction):
-			"""Function that check in one direction and return a set of legal moves for the chariot."""
+			"""Function that check in one direction and only in one axis.
+			Takes position, axis, and direction as parameters and return a set of legal moves for the chariot."""
 
 			def update_position(position, axis, direction):
-				"""Takes the position, axis to be changed, and the direction of movement as parameters. Update and return the new position."""
-
+				"""Takes the position, axis to be changed, and the direction of movement as parameters.
+				Update and return the new position."""
 				position_list = list(position)
 				position_list[axis] += direction
 				return tuple(position_list)
 
+			# Move in the direction in the specified axis.
 			moves = set()
 			position = update_position(position, axis, direction)
-
 			while position in board:
 
+				# Chariot can move as long as if the square is empty or containing a game piece belongs to the opponent.
 				if board[position] is None:
 					moves.add(position)
 					position =update_position(position, axis, direction)
-
 				elif board[position].get_player() != self._player:
 					moves.add(position)
 					break
-
 				else:
 					break
 
 			return moves
 
 		def check_extended_diagonal(board, position, diagonalMovesExtended, centerPosition):
-			"""Takes the dictionary of Extended diagonal moves and the center position of the fortress as parameters and return a set of legal diagonal moves for the Chariot."""
+			"""Takes the board, current position, dictionary of Extended diagonal moves and
+			the center position of the fortress as parameters.
+			Returns a set of legal diagonal moves for the Chariot."""
 
 			moves = set()
 			if position in diagonalMovesExtended and board[centerPosition] is None:
@@ -710,9 +645,11 @@ class Chariot(GamePiece):
 					moves.add(extendedDiagonalMove)
 			return moves
 
+		# Add current position
 		legalMoves = set()
 		legalMoves.add(current_position)
 
+		# Add all orthogonal moves
 		for axis in [0, 1]:
 			for direction in [-1, 1]:
 				legalMoves = legalMoves.union(orthogonal_check(current_position, axis, direction))
@@ -720,14 +657,19 @@ class Chariot(GamePiece):
 		# Add any available diagonal moves
 		if current_position in self._diagonalMoves:
 			for move in self._diagonalMoves[current_position]:
+
+				# Adding standard diagonal moves
 				if board[move] is None or board[move].get_player() != self._player:
 					legalMoves.add(move)
 
-			legalMoves = legalMoves.union(check_extended_diagonal(board, current_position, self._diagonalMovesExtendedRed, (1, 4)))
-
-			legalMoves = legalMoves.union(check_extended_diagonal(board, current_position, self._diagonalMovesExtendedBlue, (8, 4)))
+			# Adding extended diagonal moves
+			legalMoves = legalMoves.union(check_extended_diagonal(board, current_position,
+			                                                      self._diagonalMovesExtendedRed, (1, 4)))
+			legalMoves = legalMoves.union(check_extended_diagonal(board, current_position,
+			                                                      self._diagonalMovesExtendedBlue, (8, 4)))
 
 		return legalMoves
+
 
 class Cannon(GamePiece):
 	"""A class that represent Cannon. Inherited from GamePiece."""
@@ -756,35 +698,39 @@ class Cannon(GamePiece):
 		Return all legal moves that the Cannon can play next."""
 
 		def jump_over_check(position, axis, direction):
-			"""Function that check in one direction and return a set of legal moves for the chariot."""
+			"""Function that check in one direction in one axis and determine what moves are valid.
+			 Takes the position of the cannon, axis to be checked, and direction as parameters.
+			 Returns a set of legal moves for the cannon."""
 
 			def update_position(position, axis, direction):
-				"""Takes the position, axis to be changed, and the direction of movement as parameters. Update and return the new position."""
+				"""Takes the position, axis to be changed, and the direction of movement as parameters.
+				Update and return the new position."""
 
 				position_list = list(position)
 				position_list[axis] += direction
 				return tuple(position_list)
 
+			# Move toward the direction at the specified axis one square at a time.
 			moves = set()
 			position = update_position(position, axis, direction)
 			jumped = False
-
 			while position in board:
 
+				# Cannon cannot jump over or capture another cannon
 				if board[position] is not None and board[position].get_name() == "Cannon":
 					break
 
+				# If the Cannon has already jumped, then all empty squares or game pieces of the opponent's are legal
 				if jumped:
 					if board[position] is None:
 						moves.add(position)
-
 					elif board[position].get_player() != self._player:
 						moves.add(position)
 						break
-
 					else:
 						break
 
+				# Keep track of if Cannon has jumped.
 				elif board[position] is not None:
 					jumped = True
 
@@ -793,29 +739,35 @@ class Cannon(GamePiece):
 			return moves
 
 		def check_diagonal(board, position, diagonalMovesExtended, centerPosition):
-			"""Takes the dictionary of Extended diagonal moves and the center position of the fortress as parameters and return a set of legal diagonal moves for the Cannon."""
+			"""Takes the board, position, the dictionary of extended diagonal moves,
+			 and the center position of the fortress as parameters.
+			 Return a set of legal diagonal moves for the Cannon."""
 			moves = set()
 			if position in diagonalMovesExtended:
 				extendedDiagonalMove = diagonalMovesExtended[position]
 				if board[centerPosition] is not None and board[centerPosition].get_name() != "Cannon":
 					if board[extendedDiagonalMove] is None:
 						moves.add(extendedDiagonalMove)
-					elif board[extendedDiagonalMove].get_player() != self._player and board[extendedDiagonalMove].get_name() != "Cannon":
+					elif board[extendedDiagonalMove].get_player() != self._player and \
+							board[extendedDiagonalMove].get_name() != "Cannon":
 						moves.add(extendedDiagonalMove)
 			return moves
 
+		# Adding the current position
 		legalMoves = set()
 		legalMoves.add(current_position)
 
+		# Adding all orthogonal moves
 		for axis in [0, 1]:
 			for direction in [-1, 1]:
 				legalMoves = legalMoves.union(jump_over_check(current_position, axis, direction))
 
+		# Adding all available diagonal moves
 		legalMoves = legalMoves.union(check_diagonal(board, current_position, self._diagonalMovesExtendedRed, (1, 4)))
-
 		legalMoves = legalMoves.union(check_diagonal(board, current_position, self._diagonalMovesExtendedBlue, (8, 4)))
 
 		return legalMoves
+
 
 class Soldier(GamePiece):
 	"""A class that represent Soldier. Inherited from GamePiece"""
@@ -847,28 +799,34 @@ class Soldier(GamePiece):
 		Return all legal moves that the Soldier can play next."""
 
 		def update_position(position, axis, direction):
-			"""Takes the position, axis to be changed, and the direction of movement as parameters. Update and return the new position."""
+			"""Takes the position, axis and the direction of movement as parameters.
+			Returns the the new position."""
 
 			position_list = list(position)
 			position_list[axis] += direction
 			return tuple(position_list)
 
+		# Adding the current position
 		legalMoves = set()
 		legalMoves.add(current_position)
 
+		# Red soldiers can only move downward and Blue soldiers can only move upward.
 		if self._player == "RED":
 			direction = 1
 		else:
 			direction = -1
 
+		# Adding all orthogonal moves
 		orthogonal_moves = {update_position(current_position, 0, direction),
 							update_position(current_position, 1, -1),
 		                    update_position(current_position, 1, 1)}
 
+		# Removing any moves that not in-bound and occupied by other game pieces owned by the player
 		for move in orthogonal_moves:
 			if move in board and (board[move] is None or board[move].get_player() != self._player):
 				legalMoves.add(move)
 
+		# Adding all extended diagonal moves
 		if current_position in self._diagonalMovesExtended:
 			extendedDiagonalMove = self._diagonalMovesExtended[current_position]
 			for move in extendedDiagonalMove:
@@ -877,73 +835,30 @@ class Soldier(GamePiece):
 
 		return legalMoves
 
+
 class InvalidPositionError(Exception):
 	"""Raised when the input position of the board is invalid."""
 	pass
 
-# def main():
-# 	game = JanggiGame()
-# 	# while game.get_game_state() == "UNFINISHED":
-# 	# 	game.print_board()
-# 	# 	validInput = False
-# 	# 	while not validInput:
-# 	# 		fromSquare = input("Where are you moving from? ")
-# 	# 		toSquare = input("Where are you moving to? ")
-# 	# 		if game.make_move(fromSquare, toSquare):
-# 	# 			validInput = True
-# 	# 		else:
-# 	# 			print("The move is invalid. Try again!")
-# 	# 			print()
-# 	game.make_move('c7', 'c6')
-# 	print("Is Red in checked?", game.is_in_check("RED"))
-# 	print("Is Blue in checked?", game.is_in_check("BLUE"))
-# 	game.make_move('c1', 'd3')
-# 	print("Is Red in checked?", game.is_in_check("RED"))
-# 	print("Is Blue in checked?", game.is_in_check("BLUE"))
-# 	game.make_move('b10', 'd7')
-# 	print("Is Red in checked?", game.is_in_check("RED"))
-# 	print("Is Blue in checked?", game.is_in_check("BLUE"))
-# 	game.make_move('b3', 'e3')
-# 	print("Is Red in checked?", game.is_in_check("RED"))
-# 	print("Is Blue in checked?", game.is_in_check("BLUE"))
-# 	game.make_move('c10', 'd8')
-# 	print("Is Red in checked?", game.is_in_check("RED"))
-# 	print("Is Blue in checked?", game.is_in_check("BLUE"))
-# 	game.make_move('h1', 'g3')
-# 	# game.print_board()
-# 	print("Is Red in checked?", game.is_in_check("RED"))
-# 	print("Is Blue in checked?", game.is_in_check("BLUE"))
-# 	game.make_move('e7', 'e6')
-# 	# game.print_board()
-# 	print("Is Red in checked?", game.is_in_check("RED"))
-# 	print("Is Blue in checked?", game.is_in_check("BLUE"))
-# 	game.make_move('e3', 'e6')
-# 	game.print_board()
-# 	print("Is Red in checked?", game.is_in_check("RED"))
-# 	print("Is Blue in checked?", game.is_in_check("BLUE"))
-# 	game.make_move('i10', 'i9')
-# 	game.print_board()
-# 	print("Is Red in checked?", game.is_in_check("RED"))
-# 	print("Is Blue in checked?", game.is_in_check("BLUE"))
-# 	game.make_move('c4', 'c5')
-# 	game.print_board()
-# 	print("Is Red in checked?", game.is_in_check("RED"))
-# 	print("Is Blue in checked?", game.is_in_check("BLUE"))
-# 	game.make_move('i9', 'f9')
-# 	game.print_board()
-# 	print("Is Red in checked?", game.is_in_check("RED"))
-# 	print("Is Blue in checked?", game.is_in_check("BLUE"))
-# 	game.make_move('b1', 'd4')
-# 	game.print_board()
-# 	print("Is Red in checked?", game.is_in_check("RED"))
-# 	print("Is Blue in checked?", game.is_in_check("BLUE"))
-# 	game.make_move('f9', 'f2')
-# 	game.print_board()
-# 	print("Is Red in checked?", game.is_in_check("RED"))
-# 	print("Is Blue in checked?", game.is_in_check("BLUE"))
-# 	game.make_move('f1', 'f2')
-# 	game.print_board()
-# 	print("Is Red in checked?", game.is_in_check("red"))
-# 	print("Is Blue in checked?", game.is_in_check("blue"))
-# if __name__ == "__main__":
-# 	main()
+
+def game_console():
+	"""Game console to activate the game to be played."""
+	game = JanggiGame()
+
+	# Repeat as long as the game is not finished
+	while game.get_game_state() == "UNFINISHED":
+		game.print_board()
+		validInput = False
+
+		# Repeat if the user input is invalid
+		while not validInput:
+			fromSquare = input("Where are you moving from? ")
+			toSquare = input("Where are youe7 moving to? ")
+			if game.make_move(fromSquare, toSquare):
+				validInput = True
+			else:
+				print("The move is invalid. Try again!")
+				print()
+
+if __name__ == "__main__":
+	game_console()
