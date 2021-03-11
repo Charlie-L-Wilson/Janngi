@@ -641,7 +641,7 @@ class Chariot(GamePiece):
 			moves = set()
 			if position in diagonalMovesExtended and board[centerPosition] is None:
 				extendedDiagonalMove = diagonalMovesExtended[position]
-				if board[extendedDiagonalMove].get_player() != self._player:
+				if board[extendedDiagonalMove] is None or board[extendedDiagonalMove].get_player() != self._player:
 					moves.add(extendedDiagonalMove)
 			return moves
 
@@ -842,24 +842,24 @@ class InvalidPositionError(Exception):
 
 
 # Try me!!!
-# def main():
-# 	"""Game console to activate the game to be played."""
-# 	game = JanggiGame()
-#
-# 	# Repeat as long as the game is not finished
-# 	while game.get_game_state() == "UNFINISHED":
-# 		game.print_board()
-# 		validInput = False
-#
-# 		# Repeat if the user input is invalid
-# 		while not validInput:
-# 			fromSquare = input("Where are you moving from? ")
-# 			toSquare = input("Where are youe7 moving to? ")
-# 			if game.make_move(fromSquare, toSquare):
-# 				validInput = True
-# 			else:
-# 				print("The move is invalid. Try again!")
-# 				print()
-#
-# if __name__ == "__main__":
-#   main()
+def main():
+	"""Game console to activate the game to be played."""
+	game = JanggiGame()
+
+	# Repeat as long as the game is not finished
+	while game.get_game_state() == "UNFINISHED":
+		game.print_board()
+		validInput = False
+
+		# Repeat if the user input is invalid
+		while not validInput:
+			fromSquare = input("Where are you moving from? ")
+			toSquare = input("Where are youe7 moving to? ")
+			if game.make_move(fromSquare, toSquare):
+				validInput = True
+			else:
+				print("The move is invalid. Try again!")
+				print()
+
+if __name__ == "__main__":
+  main()
